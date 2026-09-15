@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" fill="none">
+  <!-- Badge carré arrondi orange -->
+  <rect x="0" y="2" width="40" height="40" rx="10" fill="#f97316"/>
+  <!-- Icône panier stylisé en blanc -->
+  <path d="M10 14h3l4 12h10l3-9H13" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="20" cy="29" r="1.5" fill="white"/>
+  <circle cx="27" cy="29" r="1.5" fill="white"/>
+
+  <!-- Texte Shop -->
+  <text x="50" y="30" font-family="'DM Sans', sans-serif" font-size="24" font-weight="800" fill="#1a1a1a" letter-spacing="-0.8">Shop</text>
+  <!-- CI en orange -->
+  <text x="110" y="30" font-family="'DM Sans', sans-serif" font-size="24" font-weight="800" fill="#f97316" letter-spacing="-0.8">CI</text>
+</svg>
