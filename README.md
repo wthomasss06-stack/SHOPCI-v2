@@ -97,9 +97,7 @@ cd shopci-web
 npm run dev
 ```
 
-## Configuration de production
 
-Le backend utilise PostgreSQL via `DATABASE_URL` et accepte Cloudinary via `CLOUDINARY_URL` pour les fichiers media. Le frontend utilise uniquement `NEXT_PUBLIC_API_URL`; cette variable doit pointer vers l'URL publique de l'API, avec le suffixe `/api`.
 
 En production, remplacer les valeurs locales des deux fichiers `.env.example` par les domaines deployes, puis lancer :
 

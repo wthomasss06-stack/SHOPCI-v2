@@ -19,6 +19,7 @@ db.sqlite3
 media/
 staticfiles/
 *.log
+*.zip
 
 # Python virtual environments
 venv/
@@ -40,3 +41,4 @@ build/
 .DS_Store
 Thumbs.db
 nnn
+Nouveau Document texte.txt
