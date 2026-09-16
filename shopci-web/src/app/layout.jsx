@@ -1,5 +1,6 @@
 import { DM_Sans } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import './globals.css';
 
 // Remplace le <link> Google Fonts de l'ancien index.html : next/font
@@ -14,7 +15,16 @@ const dmSans = DM_Sans({
 export const metadata = {
   title: "ShopCI — Marketplace Côte d'Ivoire",
   description: "ShopCI — La marketplace N°1 de Côte d'Ivoire. Achetez et vendez facilement.",
-  icons: { icon: '/favicon.svg' },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/icons/apple-touch-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'ShopCI',
+  },
 };
 
 export const viewport = {
@@ -27,6 +37,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <body className={dmSans.className}>
+        <ServiceWorkerRegister />
         <Toaster
           position="top-right"
           toastOptions={{

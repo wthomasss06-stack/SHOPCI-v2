@@ -1,0 +1,40 @@
+✅ 1️⃣ Activer ton environnement virtuel
+
+Dans la console Bash de PythonAnywhere, tape :
+
+source /home/wthomasss06/ecommerce_project/venv/bin/activate
+
+Si ça marche, tu verras quelque chose comme :
+
+(venv) wthomasss06@...
+
+🔥 Ça veut dire que l’environnement est activé.
+
+✅ 2️⃣ Aller dans le dossier du backend
+
+Maintenant trouve où est ton manage.py.
+
+Tape :
+
+find ~ -name "manage.py"
+
+Tu vas voir un chemin comme :
+
+/home/wthomasss06/ecommerce_project/ecommerce_backend/manage.py
+
+Ensuite tu fais :
+
+cd /home/wthomasss06/ecommerce_project/ecommerce_backend
+✅ 3️⃣ Lancer les migrations
+
+Maintenant :
+
+python manage.py makemigrations
+python manage.py migrate
+✅ 4️⃣ Vérifier si tout est OK
+
+Tape :
+
+python manage.py showmigrations
+
+Si tu vois des [X] partout 👉 migrations appliquées ✔

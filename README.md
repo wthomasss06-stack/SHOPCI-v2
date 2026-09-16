@@ -27,7 +27,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Renseigner ensuite `SECRET_KEY`, `DATABASE_URL`, `DEBUG`, `ALLOWED_HOSTS` et `CORS_ALLOWED_ORIGINS` dans `ecommerce_backend/.env`.
+Le fichier copie une configuration de developpement : renseigner au minimum `SECRET_KEY` et `DATABASE_URL` dans `ecommerce_backend/.env`. Pour la production, passer `DEBUG=False`, definir le domaine dans `ALLOWED_HOSTS` et les origines frontend dans `CORS_ALLOWED_ORIGINS`. Ajouter `CLOUDINARY_URL` pour servir les medias sur un hebergement distant.
 
 Creer une cle Django aleatoire :
 
@@ -48,13 +48,19 @@ python manage.py runserver 8000
 ```powershell
 cd shopci-web
 npm ci
-Copy-Item .env.example .env.local
+
 ```
 
 Pour un lancement local, verifier que `shopci-web/.env.local` contient :
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+Creer ce fichier depuis l'exemple :
+
+```powershell
+Copy-Item .env.example .env.local
 ```
 
 Lancer l'application :
@@ -91,9 +97,17 @@ cd shopci-web
 npm run dev
 ```
 
-## Etat connu du backend
+## Configuration de production
 
-Le dossier backend actuellement fourni ne contient pas `manage.py`, `wsgi.py`, `asgi.py` ni l'application `cart` referencee par `settings.py` et `urls.py`. Le serveur Django ne peut donc pas demarrer tant que ces elements ne sont pas restaures ou retires de la configuration.
+Le backend utilise PostgreSQL via `DATABASE_URL` et accepte Cloudinary via `CLOUDINARY_URL` pour les fichiers media. Le frontend utilise uniquement `NEXT_PUBLIC_API_URL`; cette variable doit pointer vers l'URL publique de l'API, avec le suffixe `/api`.
+
+En production, remplacer les valeurs locales des deux fichiers `.env.example` par les domaines deployes, puis lancer :
+
+```powershell
+python manage.py check --deploy
+python manage.py collectstatic --noinput
+npm run build
+```
 
 ## Git
 

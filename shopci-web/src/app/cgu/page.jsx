@@ -371,7 +371,7 @@ export default function CGUPage() {
 
             {/* Date badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(59,130,246,.15)', border: '1px solid rgba(59,130,246,.35)', borderRadius: 999, padding: '5px 14px', fontSize: 12.5, color: '#93c5fd', fontWeight: 600, animation: 'cgu-hero-in .7s ease .24s both' }}>
-              <Calendar size={14} /> Dernière mise à jour : Janvier 2025
+              <Calendar size={14} /> Dernière mise à jour : Septembre 2026
             </div>
           </div>
         </section>
@@ -501,6 +501,14 @@ export default function CGUPage() {
                   </HighlightBox>
                 </div>
 
+                {/* Section 9 */}
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="9" color="#f97316" bg="rgba(249,115,22,.12)"/> Modification des CGU</div>
+                  <InfoBlock>
+                    ShopCI peut modifier les présentes CGU à tout moment, notamment pour refléter une évolution du service ou de la réglementation. En cas de modification substantielle, les utilisateurs en seront informés par notification in-app, bannière sur le site ou email, avant leur entrée en vigueur. La poursuite de l'utilisation de ShopCI après notification vaut acceptation des nouvelles conditions.
+                  </InfoBlock>
+                </div>
+
                 {/* Accept banner */}
                 <div className="cgu-accept-banner">
                   <CheckCircle size={32} color="#f97316" style={{ margin: '0 auto 10px', display: 'block' }} />
@@ -526,7 +534,12 @@ export default function CGUPage() {
                     <ItemRow icon={Eye} color="#3b82f6">Numéro de téléphone (+225)</ItemRow>
                     <ItemRow icon={Eye} color="#3b82f6">Adresse de livraison</ItemRow>
                     <ItemRow icon={Eye} color="#3b82f6">Historique des commandes</ItemRow>
-                    <ItemRow icon={Eye} color="#3b82f6">Données de navigation (cookies)</ItemRow>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: 'rgba(59,130,246,.06)', border: '1px solid rgba(59,130,246,.2)', borderRadius: 12, padding: '12px 16px', marginTop: 12 }}>
+                    <Info size={15} color="#3b82f6" style={{ flexShrink: 0, marginTop: 1 }} />
+                    <span style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.55 }}>
+                      ShopCI n'utilise actuellement aucun cookie publicitaire ni outil de mesure d'audience tiers (type Google Analytics). Seul un stockage technique local à votre navigateur conserve votre session de connexion.
+                    </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: 'rgba(220,38,38,.06)', border: '1px solid rgba(220,38,38,.2)', borderRadius: 12, padding: '12px 16px', marginTop: 12 }}>
                     <Lock size={15} color="#dc2626" style={{ flexShrink: 0, marginTop: 1 }} />
@@ -568,7 +581,7 @@ export default function CGUPage() {
 
                 <div style={{ marginBottom: 32 }}>
                   <div className="cgu-sec-title"><SectionNum n="5" color="#3b82f6" bg="rgba(59,130,246,.12)"/> Vos droits</div>
-                  <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 12 }}>Conformément à la loi ivoirienne, chaque utilisateur dispose des droits suivants :</p>
+                  <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 12 }}>Conformément à la loi n° 2013-450 du 19 juin 2013 relative à la protection des données à caractère personnel de Côte d'Ivoire, et sous le contrôle de l'ARTCI, chaque utilisateur dispose des droits suivants :</p>
                   <div className="cgu-droits-grid" style={{ marginBottom: 12 }}>
                     {["Droit d'accès","Droit de rectification","Droit d'opposition","Droit à l'effacement","Droit à la limitation","Droit à la portabilité"].map(d => (
                       <div key={d} className="cgu-droit-item">
@@ -593,10 +606,14 @@ export default function CGUPage() {
                     {[
                       { label: 'Nom du site :', value: 'ShopCI' },
                       { label: 'Activité :', value: 'Plateforme de mise en relation acheteurs et vendeurs' },
+                      { label: 'Forme juridique :', value: '[À COMPLÉTER PAR LE CLIENT]' },
+                      { label: 'RCCM :', value: '[À COMPLÉTER PAR LE CLIENT]' },
+                      { label: 'Directeur de publication :', value: '[À COMPLÉTER PAR LE CLIENT]' },
+                      { label: 'Hébergeur :', value: '[À COMPLÉTER PAR LE CLIENT]' },
                       { label: 'Pays :', value: 'République de Côte d\'Ivoire', icon: MapPin },
                       { label: 'Contact :', value: 'contact@shopci.ci', icon: Mail },
-                    ].map((row, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', padding: '7px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none' }}>
+                    ].map((row, i, arr) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', padding: '7px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
                         {row.icon && React.createElement(row.icon, { size: 15, color: '#f97316' })}
                         <strong style={{ color: 'var(--text)' }}>{row.label}</strong> {row.value}
                       </div>

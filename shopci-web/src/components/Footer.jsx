@@ -5,6 +5,7 @@ import {
   Phone, Mail, MapPinned,
   Home, Info, HelpCircle, ShieldCheck, ChevronRight,
 } from 'lucide-react';
+import PwaInstallButton from './PwaInstallButton';
 
 function LogoShopCI({ size = 30 }) {
   return (
@@ -127,6 +128,7 @@ export default function Footer() {
               <span>Abidjan, Plateau — CI</span>
             </span>
           </div>
+          <PwaInstallButton />
         </div>
 
         {/* Col navigation */}
