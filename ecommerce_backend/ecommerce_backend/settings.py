@@ -42,7 +42,9 @@ INSTALLED_APPS = [
 ]
 
 # Médias en production : Cloudinary si CLOUDINARY_URL est définie (cf. plus bas)
-CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='').strip()
+if CLOUDINARY_URL and not CLOUDINARY_URL.startswith('cloudinary://'):
+    CLOUDINARY_URL = ''
 if CLOUDINARY_URL:
     INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
 
