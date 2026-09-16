@@ -89,8 +89,9 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         vendor = instance.vendor
         if vendor:
             data.setdefault('vendor_name', vendor.username)
-            data.setdefault('vendor_email', vendor.email)
-            data.setdefault('vendor_phone', getattr(vendor, 'phone', None))
+            # ⚠️ vendor_email / vendor_phone : ne jamais réinjecter ici (endpoint public).
+            # Le serializer les a volontairement retirés (voir products/serializers.py) —
+            # ce setdefault() les remettait en douce sur la vue détail uniquement.
 
             if not data.get('vendor_profile_photo') and getattr(vendor, 'profile_photo', None):
                 try:

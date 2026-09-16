@@ -42,9 +42,7 @@ INSTALLED_APPS = [
 ]
 
 # Médias en production : Cloudinary si CLOUDINARY_URL est définie (cf. plus bas)
-CLOUDINARY_URL = config('CLOUDINARY_URL', default='').strip()
-if CLOUDINARY_URL and not CLOUDINARY_URL.startswith('cloudinary://'):
-    CLOUDINARY_URL = ''
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
 if CLOUDINARY_URL:
     INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
 
@@ -166,6 +164,7 @@ REST_FRAMEWORK = {
         'anon': '60/minute',
         'user': '300/minute',
         'auth': '5/minute',
+        'google_auth': '10/minute',
         'password_reset': '3/hour',
         'password_reset_confirm': '10/hour',
     },
@@ -206,9 +205,6 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS', default='http://localhost:3000', cast=Csv()
 )
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS', default='http://localhost:3000', cast=Csv()
-)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CORS_ALLOW_HEADERS = [
@@ -232,6 +228,11 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@shopci.com')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
 # ==================================================
+# GOOGLE OAUTH — vérification des ID tokens émis par NextAuth côté frontend
+# ==================================================
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
+
+# ==================================================
 # FILE UPLOAD SETTINGS
 # ==================================================
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5 MB
@@ -242,7 +243,6 @@ ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 # SECURITY SETTINGS (production uniquement)
 # ==================================================
 if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

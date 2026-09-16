@@ -17,48 +17,7 @@ import {
 import { productsAPI, cartAPI, authAPI } from '@/services/api';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
-
-/* ─── Loader inline (pas besoin de fichier séparé) ──────────── */
-function Loader({ message = 'Chargement...' }) {
-  const dark = typeof document !== 'undefined' && document.body.classList.contains('dark');
-  return (
-    <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background: dark ? '#111113' : '#fafafa', zIndex:9999 }}>
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'18px', background: dark ? '#1c1c1e' : '#fff', padding:'40px 48px', borderRadius:'20px', boxShadow: dark ? '0 8px 40px rgba(0,0,0,0.5)' : '0 8px 40px rgba(0,0,0,0.10)', border: dark ? '1px solid #3a3a3c' : '1px solid #f3f4f6' }}>
-        {/* Logo animé */}
-        <div style={{ position:'relative', width:'64px', height:'64px', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <svg viewBox="0 0 44 44" width="52" height="52" fill="none">
-            <rect width="44" height="44" rx="12" fill="#f97316" style={{ filter:'drop-shadow(0 4px 12px rgba(249,115,22,0.4))' }}/>
-            <path d="M10 16h4l4.5 13h11l3.5-10H14" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="19.5" cy="32" r="2" fill="white"/>
-            <circle cx="27.5" cy="32" r="2" fill="white"/>
-          </svg>
-          <div style={{ position:'absolute', inset:'-6px', borderRadius:'50%', border:'3px solid #f97316', animation:'shopci-ring 1.4s ease-out infinite' }}/>
-        </div>
-        {/* Nom */}
-        <div style={{ fontSize:'26px', fontWeight:'800', letterSpacing:'-0.8px' }}>
-          <span style={{ color: dark ? '#f5f5f7' : '#1a1a1a' }}>Shop</span>
-          <span style={{ color:'#f97316' }}>CI</span>
-        </div>
-        {/* Barre de progression */}
-        <div style={{ width:'160px', height:'4px', background:'#f3f4f6', borderRadius:'4px', overflow:'hidden' }}>
-          <div style={{ height:'100%', background:'linear-gradient(90deg,#f97316,#fb923c,#f97316)', borderRadius:'4px', animation:'shopci-progress 1.6s ease-in-out infinite' }}/>
-        </div>
-        {/* Points */}
-        <div style={{ display:'flex', gap:'8px' }}>
-          {[0,1,2,3].map(i => (
-            <div key={i} style={{ width:'10px', height:'10px', borderRadius:'50%', background:'#f97316', animation:`shopci-dot 1.2s ease-in-out ${i*0.15}s infinite` }}/>
-          ))}
-        </div>
-        <p style={{ fontSize:'13px', color:'#9ca3af' }}>{message}</p>
-      </div>
-      <style>{`
-        @keyframes shopci-ring     { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.8);opacity:0} }
-        @keyframes shopci-progress { 0%{width:0%;margin-left:0} 50%{width:70%;margin-left:0} 100%{width:0%;margin-left:100%} }
-        @keyframes shopci-dot      { 0%,80%,100%{transform:scale(.6);opacity:.3} 40%{transform:scale(1.2);opacity:1} }
-      `}</style>
-    </div>
-  );
-}
+import Loader from '@/components/Loader';
 
 /* ─── Mapping catégories → icônes ─────────────────────────── */
 const CATEGORIE_ICONES = {

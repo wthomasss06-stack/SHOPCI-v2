@@ -1,8 +1,10 @@
 import HomeContent from '../HomeContent';
 
 export const metadata = {
-  title: 'Boutique — ShopCI',
-  description: 'Parcourez tous les produits disponibles sur ShopCI.',
+  metadataBase: new URL('https://shopci-v2.vercel.app'),
+  title: 'Catalogue ShopCI | Produits en ligne',
+  description: 'Parcourez le catalogue ShopCI : smartphones, électroménager, mode, maison et bien plus encore.',
+  alternates: { canonical: '/shop' },
 };
 
 export default function ShopPage() {

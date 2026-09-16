@@ -92,6 +92,81 @@ class LoginView(APIView):
         )
 
 
+class GoogleAuthView(APIView):
+    """
+    Échange un ID token Google (vérifié côté NextAuth) contre les JWT internes.
+    Ne fait confiance à rien venant du client : le token est re-vérifié ici,
+    côté serveur, directement auprès de Google.
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'google_auth'
+
+    def post(self, request):
+        id_token_str = request.data.get('id_token')
+        if not id_token_str:
+            return Response({'error': 'id_token requis'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not settings.GOOGLE_CLIENT_ID:
+            return Response(
+                {'error': "Authentification Google non configurée côté serveur."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+
+        try:
+            payload = google_id_token.verify_oauth2_token(
+                id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
+            )
+        except ValueError:
+            return Response({'error': 'Token Google invalide ou expiré'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        email = payload.get('email')
+        if not email or not payload.get('email_verified'):
+            return Response({'error': 'Email Google non vérifié'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            base_username = email.split('@')[0][:25] or 'user'
+            username = base_username
+            suffix = 1
+            while User.objects.filter(username=username).exists():
+                suffix += 1
+                username = f"{base_username}{suffix}"
+
+            full_name = (payload.get('name') or '').split(' ', 1)
+            user = User.objects.create(
+                username=username,
+                email=email,
+                first_name=full_name[0] if full_name else '',
+                last_name=full_name[1] if len(full_name) > 1 else '',
+                user_type='acheteur',
+            )
+            user.set_unusable_password()  # ce compte ne se connecte que via Google
+            user.save()
+
+        if user.account_status == 'suspended':
+            return Response(
+                {'error': 'Votre compte a été suspendu. Veuillez contacter le support.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if user.account_status == 'deleted':
+            return Response({'error': 'Ce compte a été supprimé.'}, status=status.HTTP_403_FORBIDDEN)
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'user': UserSerializer(user, context={'request': request}).data,
+            'tokens': {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+        })
+
+
 class ProfileUpdateView(generics.UpdateAPIView):
     """Mise à jour du profil utilisateur"""
     permission_classes = [IsAuthenticated]

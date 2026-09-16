@@ -2,9 +2,28 @@
 // VERSION FINALE — Compatible Vite + ShopCI + GPS Livraison
 
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+// ── Store en mémoire (jamais localStorage) ──────────────────────────────────
+// L'access token vit ici, en mémoire JS, le temps de la page — perdu au
+// rechargement, retrouvé via la session NextAuth (cookie httpOnly côté
+// serveur). Le refresh token, lui, ne quitte jamais le serveur Next.js :
+// voir src/lib/authOptions.js. C'est ce qui remplace le JWT en localStorage.
+let _accessToken = null;
+let _currentUser = null;
+
+export function setSession(accessToken, user) {
+  _accessToken = accessToken || null;
+  _currentUser = user || null;
+}
+
+export function clearSession() {
+  _accessToken = null;
+  _currentUser = null;
+}
 
 // Instance Axios avec configuration par défaut
 const axiosInstance = axios.create({
@@ -12,11 +31,10 @@ const axiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Intercepteur — ajout du token JWT
+// Intercepteur — ajout du token JWT (depuis le store mémoire, pas localStorage)
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (_accessToken) config.headers.Authorization = `Bearer ${_accessToken}`;
     return config;
   },
   (error) => Promise.reject(error)
@@ -30,18 +48,16 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = localStorage.getItem('refresh_token');
-        const response = await axios.post(`${API_BASE_URL}/token/refresh/`, {
-          refresh: refreshToken,
-        });
-        const { access } = response.data;
-        localStorage.setItem('access_token', access);
-        originalRequest.headers.Authorization = `Bearer ${access}`;
+        // Redemande la session à NextAuth : ça déclenche le callback jwt()
+        // côté serveur, qui rafraîchit le token Django si besoin (le refresh
+        // token, lui, reste côté serveur — jamais exposé ici).
+        const session = await getSession();
+        if (!session?.accessToken) throw new Error('no session');
+        setSession(session.accessToken, session.user);
+        originalRequest.headers.Authorization = `Bearer ${session.accessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
+        clearSession();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
@@ -62,25 +78,19 @@ export const authAPI = {
   login: async (credentials) => {
     const response = await axiosInstance.post('/users/login/', credentials);
     const { tokens, user } = response.data;
-    localStorage.setItem('access_token', tokens.access);
-    localStorage.setItem('refresh_token', tokens.refresh);
-    localStorage.setItem('user', JSON.stringify(user));
+    setSession(tokens.access, user);
     return response.data;
   },
 
-  logout: () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
+  logout: async () => {
+    clearSession();
+    const { signOut } = await import('next-auth/react');
+    await signOut({ redirect: false });
   },
 
-  getCurrentUser: () => {
-    if (typeof window === 'undefined') return null; // rendu serveur Next.js : pas de localStorage
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  },
+  getCurrentUser: () => _currentUser,
 
-  isAuthenticated: () => typeof window !== 'undefined' && !!localStorage.getItem('access_token'),
+  isAuthenticated: () => !!_accessToken,
 
   forgotPassword: async (data) => {
     const response = await axiosInstance.post('/users/password-reset/', data);
