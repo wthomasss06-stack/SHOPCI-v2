@@ -32,8 +32,40 @@ const VIDEO_EXTENSIONS = new Set(['webm', 'mp4', 'mov'])
  * @param {{ width?: number }} [options] - largeur optionnelle (sinon Cloudinary sert l'original, juste optimisé format/qualité)
  * @returns {string} URL Cloudinary prête à mettre dans un src/poster/background-image
  */
+function normalizeCloudinaryPath(localPath) {
+  let clean = String(localPath ?? '').trim().replace(/\\/g, '/')
+
+  if (!clean) return ''
+
+  clean = clean.replace(/^\/+/, '')
+
+  const prefixes = ['public/images/', 'public/', 'images/', 'akatech/images/', 'akatech/']
+
+  while (true) {
+    let stripped = false
+
+    for (const prefix of prefixes) {
+      if (clean === prefix.slice(0, -1)) {
+        clean = ''
+        stripped = true
+        break
+      }
+
+      if (clean.startsWith(prefix)) {
+        clean = clean.slice(prefix.length)
+        stripped = true
+        break
+      }
+    }
+
+    if (!stripped) break
+  }
+
+  return clean
+}
+
 export function cld(localPath, options = {}) {
-  const clean = localPath.replace(/^\/?images\//i, '')
+  const clean = normalizeCloudinaryPath(localPath)
   const dotIndex = clean.lastIndexOf('.')
   const base = dotIndex !== -1 ? clean.slice(0, dotIndex) : clean
   const ext = dotIndex !== -1 ? clean.slice(dotIndex + 1).toLowerCase() : 'jpg'
