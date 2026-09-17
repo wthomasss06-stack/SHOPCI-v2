@@ -26,12 +26,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-]
-
-if CLOUDINARY_URL:
-    INSTALLED_APPS.append('cloudinary_storage')
-
-INSTALLED_APPS += [
     'django.contrib.staticfiles',
 
     # Apps tierces
@@ -140,6 +134,7 @@ if CLOUDINARY_URL:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
+
     CLOUDINARY_STORAGE = {
         'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
         'API_KEY': config('CLOUDINARY_API_KEY'),
