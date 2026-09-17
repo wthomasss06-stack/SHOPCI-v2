@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from .models import User
+from .account_restrictions import log_account_action, resolve_restricted_account
 from .serializers import (
     UserSerializer, 
     RegisterSerializer, 
@@ -79,21 +80,20 @@ class LoginView(APIView):
         password = serializer.validated_data['password']
         
         user = authenticate(request, username=username, password=password)
-        
+
+        if user is None:
+            try:
+                candidate = User.objects.get(username=username)
+                if candidate.check_password(password):
+                    user = candidate
+            except User.DoesNotExist:
+                user = None
+
         if user is not None:
-            # Vérifier si le compte est suspendu ou supprimé
-            if user.account_status == 'suspended':
-                return Response(
-                    {'error': 'Votre compte a été suspendu. Veuillez contacter le support.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            
-            if user.account_status == 'deleted':
-                return Response(
-                    {'error': 'Ce compte a été supprimé.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            
+            ok, error = resolve_restricted_account(user)
+            if not ok:
+                return Response(error, status=status.HTTP_403_FORBIDDEN)
+
             refresh = RefreshToken.for_user(user)
             
             return Response({
@@ -169,13 +169,9 @@ class GoogleAuthView(APIView):
         else:
             sync_google_profile_photo(user, payload.get('picture'))
 
-        if user.account_status == 'suspended':
-            return Response(
-                {'error': 'Votre compte a été suspendu. Veuillez contacter le support.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        if user.account_status == 'deleted':
-            return Response({'error': 'Ce compte a été supprimé.'}, status=status.HTTP_403_FORBIDDEN)
+        ok, error = resolve_restricted_account(user)
+        if not ok:
+            return Response(error, status=status.HTTP_403_FORBIDDEN)
 
         refresh = RefreshToken.for_user(user)
 
@@ -281,7 +277,8 @@ class SuspendAccountView(APIView):
     def post(self, request):
         user = request.user
         user.suspend_account()
-        
+        log_account_action(user, 'suspended')
+
         return Response({
             'message': 'Votre compte a été suspendu avec succès'
         })
@@ -294,7 +291,8 @@ class DeleteAccountView(APIView):
     def delete(self, request):
         user = request.user
         user.soft_delete()
-        
+        log_account_action(user, 'deleted')
+
         return Response({
             'message': 'Votre compte a été supprimé avec succès'
         })

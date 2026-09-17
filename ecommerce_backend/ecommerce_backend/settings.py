@@ -125,7 +125,6 @@ USE_TZ = False
 # ==================================================
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 _static_dir = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [_static_dir] if os.path.exists(_static_dir) else []
 
@@ -133,7 +132,6 @@ STATICFILES_DIRS = [_static_dir] if os.path.exists(_static_dir) else []
 # MEDIA FILES (Uploads produits, photos de profil, preuves de livraison)
 # ==================================================
 if CLOUDINARY_URL:
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -207,6 +205,12 @@ REST_FRAMEWORK = {
         'password_reset_confirm': '10/hour',
     },
 }
+
+# ==================================================
+# COMPTE — délai réactivation après suspension / suppression
+# ==================================================
+ACCOUNT_COOLDOWN_DAYS = 1
+ACCOUNT_STATUS_LOG_DIR = BASE_DIR / 'logs'
 
 # ==================================================
 # JWT CONFIGURATION (Simple JWT)

@@ -3,6 +3,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import User
+from .account_restrictions import is_cooldown_over, build_cooldown_error
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -46,6 +47,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password', 'password2', 'phone', 'address', 'user_type']
 
+    def validate_email(self, value):
+        existing = User.objects.filter(email=value).first()
+        if not existing:
+            return value
+        if existing.account_status == 'active':
+            raise serializers.ValidationError('Cet email est déjà utilisé.')
+        if existing.account_status == 'suspended':
+            if not is_cooldown_over(existing):
+                err = build_cooldown_error(existing, 'suspendu')
+                raise serializers.ValidationError(err['error'])
+            raise serializers.ValidationError(
+                'Cet email est déjà associé à un compte suspendu. Reconnectez-vous pour le réactiver.'
+            )
+        if existing.account_status == 'deleted' and not is_cooldown_over(existing):
+            err = build_cooldown_error(
+                existing,
+                'suspendu' if existing.account_status == 'suspended' else 'supprimé',
+            )
+            raise serializers.ValidationError(err['error'])
+        return value
+
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({
@@ -55,6 +77,19 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
+        email = validated_data.get('email')
+        existing = User.objects.filter(email=email).first()
+
+        if existing and existing.account_status == 'deleted' and is_cooldown_over(existing):
+            password = validated_data.pop('password')
+            existing.username = validated_data.get('username', existing.username)
+            existing.phone = validated_data.get('phone', existing.phone)
+            existing.address = validated_data.get('address', existing.address)
+            existing.user_type = validated_data.get('user_type', existing.user_type)
+            existing.set_password(password)
+            existing.reactivate_from_deletion()
+            return existing
+
         user = User.objects.create_user(**validated_data)
         return user
 

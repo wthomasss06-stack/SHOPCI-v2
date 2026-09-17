@@ -98,3 +98,18 @@ class User(AbstractUser):
         self.deleted_at = timezone.now()
         self.is_active = False
         self.save()
+
+    def reactivate_from_deletion(self):
+        """Réactive un compte supprimé après le délai de carence."""
+        self.account_status = 'active'
+        self.deleted_at = None
+        self.suspended_at = None
+        self.is_active = True
+        self.onboarding_completed = False
+        self.cgu_accepted = False
+        self.save(
+            update_fields=[
+                'account_status', 'deleted_at', 'suspended_at', 'is_active',
+                'onboarding_completed', 'cgu_accepted',
+            ]
+        )
