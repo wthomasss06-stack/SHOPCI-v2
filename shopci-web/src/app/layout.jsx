@@ -1,5 +1,6 @@
 import { DM_Sans } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/next';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import Providers from '@/components/Providers';
 import SessionSync from '@/components/SessionSync';
@@ -57,6 +58,7 @@ export default function RootLayout({ children }) {
             }}
           />
           {children}
+          <Analytics />
         </Providers>
       </body>
     </html>

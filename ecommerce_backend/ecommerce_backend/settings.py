@@ -125,7 +125,9 @@ USE_TZ = False
 # ==================================================
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+_static_dir = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [_static_dir] if os.path.exists(_static_dir) else []
 
 # ==================================================
 # MEDIA FILES (Uploads produits, photos de profil, preuves de livraison)
