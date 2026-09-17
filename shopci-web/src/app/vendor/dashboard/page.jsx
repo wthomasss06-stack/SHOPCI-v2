@@ -16,7 +16,6 @@ import { productsAPI, ordersAPI, authAPI } from '@/services/api';
 import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
 import Loader from '@/components/Loader';
-import Footer from '@/components/Footer';
 
 /* ── Formatage FCFA ─────────────────────────────────────── */
 const fcfa = (val) => {
@@ -968,7 +967,6 @@ export default function VendorDashboard() {
           </div>{/* end vd-section */}
         </main>
 
-        <Footer />
       </div>
     </>
   );

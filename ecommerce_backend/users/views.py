@@ -22,6 +22,24 @@ from .serializers import (
     ProfileUpdateSerializer,
 )
 
+import urllib.request
+from django.core.files.base import ContentFile
+
+
+def sync_google_profile_photo(user, picture_url):
+    """Télécharge la photo Google si l'utilisateur n'en a pas encore."""
+    if not picture_url or user.profile_photo:
+        return
+    try:
+        req = urllib.request.Request(picture_url, headers={'User-Agent': 'ShopCI/1.0'})
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = resp.read()
+        if not data:
+            return
+        user.profile_photo.save(f'google_{user.pk}.jpg', ContentFile(data), save=True)
+    except Exception:
+        pass
+
 
 class RegisterView(generics.CreateAPIView):
     """Inscription d'un nouvel utilisateur"""
@@ -147,6 +165,9 @@ class GoogleAuthView(APIView):
             )
             user.set_unusable_password()  # ce compte ne se connecte que via Google
             user.save()
+            sync_google_profile_photo(user, payload.get('picture'))
+        else:
+            sync_google_profile_photo(user, payload.get('picture'))
 
         if user.account_status == 'suspended':
             return Response(
@@ -195,7 +216,12 @@ class OnboardingView(APIView):
         user.user_type = user_type
         user.cgu_accepted = True
         user.onboarding_completed = True
-        user.save(update_fields=['first_name', 'last_name', 'user_type', 'cgu_accepted', 'onboarding_completed'])
+
+        update_fields = ['first_name', 'last_name', 'user_type', 'cgu_accepted', 'onboarding_completed']
+        if request.FILES.get('profile_photo'):
+            user.profile_photo = request.FILES['profile_photo']
+            update_fields.append('profile_photo')
+        user.save(update_fields=update_fields)
 
         return Response({
             'message': 'Compte finalisé avec succès.',

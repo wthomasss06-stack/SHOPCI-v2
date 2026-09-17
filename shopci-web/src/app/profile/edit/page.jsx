@@ -10,7 +10,8 @@ import {
   User, Mail, Phone, MapPin, Lock, Save, ArrowLeft, AlertCircle, CheckCircle,
   Camera, Eye, EyeOff, Trash2, PauseCircle, Crop, Check, Home, ShieldCheck,
 } from 'lucide-react';
-import { authAPI } from '@/services/api';
+import { authAPI, setSession } from '@/services/api';
+import { useSession } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Loader from '@/components/Loader';
@@ -38,6 +39,7 @@ async function getCroppedImg(imageSrc, pixelCrop) {
 // ── Composant ───────────────────────────────────────────────────
 export default function ProfileEditPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const user = authAPI.getCurrentUser();
 
   const [pageLoading, setPageLoading] = useState(true);
@@ -117,7 +119,7 @@ export default function ProfileEditPage() {
       if (profilePhoto instanceof File) fd.append('profile_photo', profilePhoto);
       await authAPI.updateProfile(fd);
       const updated = { ...user, ...formData, profile_photo: profilePhoto instanceof File ? photoPreview : (profilePhoto || user?.profile_photo) };
-      localStorage.setItem('user', JSON.stringify(updated));
+      setSession(session?.accessToken || null, updated);
       setSuccess('Profil mis à jour avec succès !');
       setTimeout(() => router.push(user?.user_type === 'vendeur' ? '/vendor/dashboard' : '/buyer/dashboard'), 2000);
     } catch (err) {
@@ -165,7 +167,6 @@ export default function ProfileEditPage() {
   const TABS = [
     { id: 'profile',  label: 'Informations',  icon: User },
     { id: 'photo',    label: 'Photo',          icon: Camera },
-    { id: 'password', label: 'Mot de passe',   icon: Lock },
     { id: 'account',  label: 'Compte',         icon: ShieldCheck },
   ];
 
@@ -462,20 +463,17 @@ export default function ProfileEditPage() {
             <div className="pe-panel-header-ico">
               {activeTab === 'profile'  && <User size={20} />}
               {activeTab === 'photo'    && <Camera size={20} />}
-              {activeTab === 'password' && <Lock size={20} />}
               {activeTab === 'account'  && <ShieldCheck size={20} />}
             </div>
             <div>
               <div className="pe-panel-title">
                 {activeTab === 'profile'  && 'Informations personnelles'}
                 {activeTab === 'photo'    && 'Photo de profil'}
-                {activeTab === 'password' && 'Changer le mot de passe'}
                 {activeTab === 'account'  && 'Gestion du compte'}
               </div>
               <div className="pe-panel-subtitle">
                 {activeTab === 'profile'  && 'Modifiez vos informations de base'}
                 {activeTab === 'photo'    && 'Choisissez et recadrez votre photo'}
-                {activeTab === 'password' && 'Renforcez la sécurité de votre compte'}
                 {activeTab === 'account'  && 'Actions irréversibles sur votre compte'}
               </div>
             </div>
@@ -625,46 +623,6 @@ export default function ProfileEditPage() {
                   </div>
                 )}
               </div>
-            )}
-
-            {/* ── TAB MOT DE PASSE ── */}
-            {activeTab === 'password' && (
-              <form onSubmit={handlePasswordSubmit}>
-                <div className="pe-alert pe-alert-info" style={{ marginBottom: '20px' }}>
-                  <AlertCircle size={16} />
-                  <span>Après modification, vous serez déconnecté et devrez vous reconnecter avec votre nouveau mot de passe.</span>
-                </div>
-
-                {[
-                  { name: 'old_password',     label: 'Mot de passe actuel',          placeholder: 'Votre mot de passe actuel' },
-                  { name: 'new_password',     label: 'Nouveau mot de passe',         placeholder: 'Nouveau mot de passe (min. 8 caractères)', hint: 'Minimum 8 caractères avec majuscules, minuscules et chiffres.' },
-                  { name: 'confirm_password', label: 'Confirmer le nouveau mot de passe', placeholder: 'Confirmer le nouveau mot de passe' },
-                ].map(({ name, label, placeholder, hint }) => (
-                  <div key={name} className="pe-field">
-                    <label className="pe-label">{label}</label>
-                    <div className="pe-input-wrap">
-                      <Lock size={16} className="pe-input-ico" />
-                      <input
-                        type={showPasswords[name] ? 'text' : 'password'}
-                        name={name}
-                        value={passwordData[name]}
-                        onChange={handlePasswordChange}
-                        className={`pe-input pr${errors[name] ? ' error' : ''}`}
-                        placeholder={placeholder}
-                      />
-                      <button type="button" className="pe-input-ico-right" onClick={() => togglePasswordVisibility(name)}>
-                        {showPasswords[name] ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                    {errors[name] && <p className="pe-error-msg">{errors[name]}</p>}
-                    {hint && !errors[name] && <p style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '4px' }}>{hint}</p>}
-                  </div>
-                ))}
-
-                <button type="submit" disabled={loading} className="pe-btn-primary">
-                  {loading ? 'Modification…' : <><Lock size={16} /> Changer le mot de passe</>}
-                </button>
-              </form>
             )}
 
             {/* ── TAB COMPTE ── */}

@@ -105,7 +105,7 @@ function buildBuyerNotifs(orders) {
 }
 
 /* ════════════════════════════════════════════════════════ */
-export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }) {
+export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '', heroOverlay = false }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [user, setUser] = useState(() => authAPI.getCurrentUser());
@@ -314,10 +314,11 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
         { icon:Home,        label:'Accueil',  path:'/',      action:() => router.push('/') },
         { icon:Store,       label:'Boutique', path:'/shop',  action:() => router.push('/shop') },
         { icon:ShoppingCart,label:'Panier',   path:'/cart',  action:() => router.push('/cart'), center:true, badge:cartCount },
-        { icon:User,        label:'Connexion',path:'/login', action:() => router.push('/login') },
+        { icon:User,        label:'Commencer',path:'/register', action:() => router.push('/register') },
       ];
 
   const curPath = pageCourante || (typeof window !== 'undefined' ? window.location.pathname : '');
+  const heroTop = heroOverlay && !scrolled;
 
   return (
     <>
@@ -332,6 +333,18 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
 
         .nb-bar { background:var(--bg2,#fff); border-bottom:1px solid var(--border,#f0f0f0); position:sticky; top:0; z-index:200; transition:box-shadow .25s,border-color .25s,background .3s; }
         .nb-bar.scrolled { box-shadow:0 4px 24px rgba(0,0,0,.08); border-color:var(--border,#e8e8e8); }
+        .nb-bar.hero-top { background:transparent; border-bottom-color:transparent; box-shadow:none; }
+        .nb-bar.hero-top .nb-link { color:rgba(255,255,255,.82); }
+        .nb-bar.hero-top .nb-link:hover { background:rgba(255,255,255,.1); color:#fff; }
+        .nb-bar.hero-top .nb-link.act { background:rgba(249,115,22,.22); color:#fff; }
+        .nb-bar.hero-top .nb-ibtn { color:rgba(255,255,255,.85); }
+        .nb-bar.hero-top .nb-ibtn:hover { background:rgba(255,255,255,.12); color:#fff; }
+        .nb-bar.hero-top .nb-login { border-color:rgba(255,255,255,.35); color:#fff; }
+        .nb-bar.hero-top .nb-login:hover { background:rgba(255,255,255,.1); }
+        .nb-bar.hero-top .nb-theme-btn.dark-off { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); }
+        .nb-bar.hero-top.scrolled { background:var(--bg2,#fff); border-bottom-color:var(--border,#f0f0f0); }
+        .nb-bar.hero-top.scrolled .nb-link { color:var(--text2,#6b7280); }
+        .nb-bar.hero-top.scrolled .nb-link.act { color:#f97316; background:rgba(249,115,22,.12); }
         .nb-inner { max-width:1300px; margin:0 auto; padding:0 24px; height:64px; display:flex; align-items:center; position:relative; }
 
         .nb-logo { background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; flex-shrink:0; transition:opacity .2s; }
@@ -532,11 +545,11 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
       `}</style>
 
       {/* ══ TOP NAVBAR ══ */}
-      <header className={`nb-bar${scrolled ? ' scrolled' : ''}`}>
+      <header className={`nb-bar${heroTop ? ' hero-top' : ''}${scrolled ? ' scrolled' : ''}`}>
         <div className="nb-inner">
 
           <button className="nb-logo" onClick={() => router.push('/')}>
-            <LogoShopCI size={30} dark={darkMode}/>
+            <LogoShopCI size={30} dark={darkMode || heroTop}/>
           </button>
 
           {!user && (
@@ -710,8 +723,7 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
                   <ShoppingCart size={20}/>
                   {cartCount > 0 && <span className="nb-badge">{cartCount > 99 ? '99+' : cartCount}</span>}
                 </button>
-                <button className="nb-login"  onClick={() => router.push('/login')}>Connexion</button>
-                <button className="nb-signup" onClick={() => router.push('/register')}>S'inscrire</button>
+                <button className="nb-signup" onClick={() => router.push('/register')}>Créer votre compte</button>
               </>
             )}
           </div>
@@ -763,8 +775,7 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
               <>
                 <div className="nb-mdiv"/>
                 <div className="nb-mauth">
-                  <button style={{ border:'1.5px solid var(--border,#e5e7eb)', background:'none', color:'var(--text,#1a1a1a)' }} onClick={() => { router.push('/login'); setMenuMobile(false); }}>Connexion</button>
-                  <button style={{ border:'none', background:'#f97316', color:'#fff', boxShadow:'0 3px 12px rgba(249,115,22,.3)' }} onClick={() => { router.push('/register'); setMenuMobile(false); }}>S'inscrire</button>
+                  <button style={{ border:'none', background:'#f97316', color:'#fff', boxShadow:'0 3px 12px rgba(249,115,22,.3)' }} onClick={() => { router.push('/register'); setMenuMobile(false); }}>Créer votre compte</button>
                 </div>
               </>
             )}

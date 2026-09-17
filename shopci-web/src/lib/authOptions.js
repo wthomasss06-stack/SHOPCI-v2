@@ -2,6 +2,7 @@ import GoogleProvider from 'next-auth/providers/google';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const ACCESS_TOKEN_LIFETIME_MS = 30 * 60 * 1000; // doit matcher SIMPLE_JWT.ACCESS_TOKEN_LIFETIME côté Django
+const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 jours — aligné localStorage + refresh Django
 
 async function exchangeGoogleToken(googleIdToken) {
   const res = await fetch(`${API_BASE_URL}/users/google-auth/`, {
@@ -30,7 +31,8 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: SESSION_MAX_AGE_SEC },
+  jwt: { maxAge: SESSION_MAX_AGE_SEC },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: '/login',

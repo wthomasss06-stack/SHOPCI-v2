@@ -11,8 +11,9 @@ import {
   ChevronLeft, ChevronRight, ZoomIn, Package, Clock, RefreshCw,
   CheckCircle2, MessageSquare, Tag, Flame
 } from 'lucide-react';
-import { productsAPI, cartAPI, authAPI } from '@/services/api';
+import { productsAPI, cartAPI } from '@/services/api';
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Loader from '@/components/Loader';
@@ -20,9 +21,14 @@ import { getImageUrl } from '@/lib/getImageUrl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+async function getAuthToken() {
+  const session = await getSession();
+  return session?.accessToken || null;
+}
+
 const favoritesAPI = {
   checkFavorite: async (productId) => {
-    const token = localStorage.getItem('access_token');
+    const token = await getAuthToken();
     if (!token) return false;
     try {
       const r = await axios.get(`${API_URL}/products/favorites/check/`, {
@@ -33,7 +39,7 @@ const favoritesAPI = {
     } catch { return false; }
   },
   toggleFavorite: async (productId) => {
-    const token = localStorage.getItem('access_token');
+    const token = await getAuthToken();
     if (!token) throw new Error('Non authentifié');
     const r = await axios.post(
       `${API_URL}/products/favorites/toggle/`,

@@ -15,7 +15,6 @@ import {
 import { ordersAPI, authAPI } from '@/services/api';
 import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import PageLoader from '@/components/Loader';
 
 /* ── Mini Sparkline SVG ────────────────────────────────── */
@@ -695,7 +694,6 @@ export default function BuyerDashboard() {
 
         </main>
 
-        <Footer />
       </div>
     </>
   );

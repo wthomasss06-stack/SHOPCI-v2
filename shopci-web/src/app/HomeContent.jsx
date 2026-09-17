@@ -492,7 +492,7 @@ export default function HomePage() {
     <div className="shopci-root">
 
       {/* ════════════════ NAVBAR ════════════════ */}
-      <Navbar nbPanier={nbPanier} pageCourante="/" />
+      <Navbar nbPanier={nbPanier} pageCourante="/" heroOverlay />
 
       {/* ════════════════════════════════════════
           HERO BANNER
@@ -928,7 +928,13 @@ export default function HomePage() {
         /* ── HERO ── */
         .shopci-hero {
           position: relative;
-          min-height: 380px;
+          min-height: 100dvh;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          margin-top: -64px;
+          padding-top: 64px;
           background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
           overflow: hidden;
         }
@@ -964,6 +970,7 @@ export default function HomePage() {
         .hero-overlay {
           position: relative;
           z-index: 2;
+          width: 100%;
           max-width: 1280px;
           margin: 0 auto;
           padding: 48px 40px 48px;
@@ -971,6 +978,7 @@ export default function HomePage() {
           grid-template-columns: 480px 1fr;
           align-items: center;
           gap: 40px;
+          flex: 1;
         }
         .hero-contenu { display: flex; flex-direction: column; gap: 28px; }
         .hero-car3d { display: flex; flex-direction: column; align-items: center; gap: 12px; }

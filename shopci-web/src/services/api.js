@@ -3,15 +3,19 @@
 
 import axios from 'axios';
 import { getSession } from 'next-auth/react';
+import {
+  clearPersistedSession,
+  persistSessionUser,
+  readPersistedSession,
+} from '@/lib/persistedSession';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-// ── Store en mémoire (jamais localStorage) ──────────────────────────────────
-// L'access token vit ici, en mémoire JS, le temps de la page — perdu au
-// rechargement, retrouvé via la session NextAuth (cookie httpOnly côté
-// serveur). Le refresh token, lui, ne quitte jamais le serveur Next.js :
-// voir src/lib/authOptions.js. C'est ce qui remplace le JWT en localStorage.
+// ── Store en mémoire + miroir profil localStorage (30 j) ───────────────────
+// L'access token reste en mémoire ; le refresh Django reste dans le JWT
+// NextAuth (cookie httpOnly). Le profil utilisateur est miroir dans
+// localStorage via lib/persistedSession.js (sans tokens).
 let _accessToken = null;
 let _currentUser = null;
 
@@ -35,11 +39,15 @@ async function hydrateSessionFromNextAuth() {
 export function setSession(accessToken, user) {
   _accessToken = accessToken || null;
   _currentUser = user || null;
+  if (accessToken && user) {
+    persistSessionUser(user);
+  }
 }
 
 export function clearSession() {
   _accessToken = null;
   _currentUser = null;
+  clearPersistedSession();
 }
 
 // Instance Axios avec configuration par défaut
@@ -125,7 +133,7 @@ export const authAPI = {
     await signOut({ redirect: false });
   },
 
-  getCurrentUser: () => _currentUser,
+  getCurrentUser: () => _currentUser || readPersistedSession()?.user || null,
 
   isAuthenticated: () => !!_accessToken,
 
