@@ -33,10 +33,16 @@ if (!cloudName || !apiKey || !apiSecret) {
   process.exit(1);
 }
 
-const BASE_FOLDER = 'akatech/images';
+const BASE_FOLDER = 'images';
 const fallbackImagesDir = path.join(__dirname, 'ecomm');
-const defaultImagesDir = path.join(__dirname, 'public', 'images');
-const imagesDir = fs.existsSync(defaultImagesDir) ? defaultImagesDir : fallbackImagesDir;
+const appPublicImagesDir = path.join(__dirname, 'shopci-web', 'public', 'images');
+const legacyRootImagesDir = path.join(__dirname, 'public', 'images');
+const defaultImagesDir = fs.existsSync(appPublicImagesDir)
+  ? appPublicImagesDir
+  : fs.existsSync(legacyRootImagesDir)
+    ? legacyRootImagesDir
+    : fallbackImagesDir;
+const imagesDir = defaultImagesDir;
 const manifestPath = path.join(__dirname, '.cloudinary-manifest.json');
 const FORCE = process.argv.includes('--force');
 const DRY_RUN = process.argv.includes('--dry-run');

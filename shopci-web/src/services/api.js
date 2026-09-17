@@ -15,6 +15,19 @@ const API_BASE_URL =
 let _accessToken = null;
 let _currentUser = null;
 
+async function hydrateSessionFromNextAuth() {
+  try {
+    const session = await getSession();
+    if (session?.accessToken) {
+      setSession(session.accessToken, session.user);
+      return session.accessToken;
+    }
+  } catch (error) {
+    console.warn('Impossible d’hydrater la session NextAuth pour l’API :', error);
+  }
+  return null;
+}
+
 export function setSession(accessToken, user) {
   _accessToken = accessToken || null;
   _currentUser = user || null;
@@ -31,10 +44,22 @@ const axiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Intercepteur — ajout du token JWT (depuis le store mémoire, pas localStorage)
+// Intercepteur — ajout du token JWT depuis la session NextAuth ou le store mémoire
 axiosInstance.interceptors.request.use(
-  (config) => {
-    if (_accessToken) config.headers.Authorization = `Bearer ${_accessToken}`;
+  async (config) => {
+    let token = _accessToken;
+
+    if (!token) {
+      token = await hydrateSessionFromNextAuth();
+    }
+
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -54,11 +79,16 @@ axiosInstance.interceptors.response.use(
         const session = await getSession();
         if (!session?.accessToken) throw new Error('no session');
         setSession(session.accessToken, session.user);
-        originalRequest.headers.Authorization = `Bearer ${session.accessToken}`;
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${session.accessToken}`,
+        };
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         clearSession();
-        window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

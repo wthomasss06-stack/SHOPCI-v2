@@ -21,9 +21,10 @@
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwuybrjxh'
 
-// Racine Cloudinary — à faire correspondre exactement au dossier utilisé
-// lors de l'upload des images AKATech sur Cloudinary.
-const BASE_FOLDER = 'akatech/images'
+// Racine Cloudinary — correspond au dossier local réellement utilisé dans le projet.
+// On garde les anciens chemins legacy tolérés en entrée, mais la cible canonique est
+// le dossier local public/images, sans préfixe akatech.
+const BASE_FOLDER = 'images'
 
 const VIDEO_EXTENSIONS = new Set(['webm', 'mp4', 'mov'])
 
