@@ -48,7 +48,7 @@ function LoginInner() {
 
   const handleGoogle = async () => {
     setLoading(true);
-    await signIn('google', { callbackUrl: searchParams.get('callbackUrl') || '/' });
+    await signIn('google', { callbackUrl: searchParams.get('callbackUrl') || '/onboarding' });
   };
 
   return (

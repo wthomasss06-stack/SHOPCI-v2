@@ -167,8 +167,44 @@ class GoogleAuthView(APIView):
         })
 
 
-class ProfileUpdateView(generics.UpdateAPIView):
-    """Mise à jour du profil utilisateur"""
+class OnboardingView(APIView):
+    """Finalisation du parcours d'inscription Google et choix de rôle."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        first_name = (request.data.get('first_name') or '').strip()
+        last_name = (request.data.get('last_name') or '').strip()
+        user_type = request.data.get('user_type')
+        cgu_accepted = request.data.get('cgu_accepted')
+
+        if not first_name:
+            return Response({'first_name': 'Le prénom est requis.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not last_name:
+            return Response({'last_name': 'Le nom est requis.'}, status=status.HTTP_400_BAD_REQUEST)
+        if user_type not in dict(User.USER_TYPE_CHOICES):
+            return Response({'user_type': 'Le type d’utilisateur est invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if isinstance(cgu_accepted, str):
+            cgu_accepted = cgu_accepted.lower() == 'true'
+        if not cgu_accepted:
+            return Response({'cgu_accepted': 'Tu dois accepter les CGU pour continuer.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.user_type = user_type
+        user.cgu_accepted = True
+        user.onboarding_completed = True
+        user.save(update_fields=['first_name', 'last_name', 'user_type', 'cgu_accepted', 'onboarding_completed'])
+
+        return Response({
+            'message': 'Compte finalisé avec succès.',
+            'user': UserSerializer(user, context={'request': request}).data,
+        })
+
+
+class ProfileUpdateView(generics.RetrieveUpdateAPIView):
+    """Mise à jour et lecture du profil utilisateur"""
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileUpdateSerializer
 
@@ -178,7 +214,7 @@ class ProfileUpdateView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 

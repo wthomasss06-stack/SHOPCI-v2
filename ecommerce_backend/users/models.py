@@ -28,6 +28,8 @@ class User(AbstractUser):
         default='acheteur',
         verbose_name="Type d'utilisateur"
     )
+    cgu_accepted = models.BooleanField(default=False, verbose_name="CGU acceptées")
+    onboarding_completed = models.BooleanField(default=False, verbose_name="Parcours d'onboarding terminé")
     
     # Photo de profil
     profile_photo = models.ImageField(

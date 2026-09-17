@@ -44,6 +44,7 @@ export const authOptions = {
         try {
           const { user, tokens } = await exchangeGoogleToken(account.id_token);
           token.shopciUser = user;
+          token.onboardingCompleted = !!user?.onboarding_completed;
           token.djangoAccess = tokens.access;
           token.djangoRefresh = tokens.refresh;
           token.accessExpires = Date.now() + ACCESS_TOKEN_LIFETIME_MS;
@@ -79,7 +80,7 @@ export const authOptions = {
       session.accessToken = token.djangoAccess;
       session.error = token.error;
       if (token.shopciUser) {
-        session.user = { ...session.user, ...token.shopciUser };
+        session.user = { ...session.user, ...token.shopciUser, onboarding_completed: token.onboardingCompleted ?? token.shopciUser?.onboarding_completed ?? false };
       }
       return session;
     },
