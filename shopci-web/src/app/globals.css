@@ -280,12 +280,11 @@ body.dark .reco-nav button:hover  { border-color: var(--orange); color: var(--or
 body.dark .section-titre          { color: var(--text); }
 
 /* ── NEWSLETTER ── */
-body.dark .shopci-newsletter      { background: linear-gradient(135deg, #0d0d0f 0%, #1a1a1c 100%); }
-body.dark .newsletter-titre       { color: var(--text); }
-body.dark .newsletter-sous        { color: var(--text2); }
-body.dark .newsletter-input       { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: #fff; }
-body.dark .newsletter-input::placeholder { color: rgba(255,255,255,.35); }
-body.dark .newsletter-input:focus { border-color: var(--orange); }
+body.dark .shopci-newsletter {
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  border-top-color: var(--border);
+}
+body.dark .newsletter-input:focus { box-shadow: 0 0 0 3px rgba(249,115,22,.18); }
 
 /* ── SIDEBAR MOBILE ── */
 body.dark .sidebar-overlay        { background: rgba(0,0,0,.7); }

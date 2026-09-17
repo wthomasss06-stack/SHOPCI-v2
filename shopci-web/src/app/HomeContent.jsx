@@ -1184,20 +1184,31 @@ export default function HomePage() {
         .reco-gc .gc-fleche { width: 22px; height: 22px; }
         @media (max-width: 580px) { .reco-gc { width: 145px !important; } }
 
-        /* ── NEWSLETTER ── */
-        .shopci-newsletter { background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); margin: 0; padding: 0; position: relative; overflow: hidden; }
-        .shopci-newsletter::before { content: ''; position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%); pointer-events: none; }
+        /* ── NEWSLETTER (thème clair / sombre via variables CSS) ── */
+        .shopci-newsletter {
+          background: linear-gradient(135deg, var(--bg2, #ffffff) 0%, var(--bg3, #f3f4f6) 100%);
+          border-top: 1px solid var(--border, #e5e7eb);
+          margin: 0; padding: 0; position: relative; overflow: hidden;
+        }
+        .shopci-newsletter::before { content: ''; position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%); pointer-events: none; }
         .newsletter-inner { max-width: 1280px; margin: 0 auto; padding: 60px 20px; display: flex; align-items: center; gap: 40px; flex-wrap: wrap; }
         .newsletter-gauche { flex: 1; min-width: 300px; position: relative; z-index: 1; }
-        .newsletter-tag { display: inline-block; background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); color: #f97316; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; letter-spacing: .5px; margin-bottom: 14px; }
-        .newsletter-titre { font-size: clamp(24px, 3vw, 36px); font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.5px; }
-        .newsletter-sous { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 24px; }
+        .newsletter-tag { display: inline-block; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.28); color: var(--orange, #f97316); font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; letter-spacing: .5px; margin-bottom: 14px; }
+        .newsletter-titre { font-size: clamp(24px, 3vw, 36px); font-weight: 800; color: var(--text, #1a1a1a); line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .newsletter-sous { font-size: 14px; color: var(--text2, #6b7280); line-height: 1.6; margin-bottom: 24px; }
         .newsletter-form { display: flex; gap: 8px; max-width: 420px; }
-        .newsletter-input { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; outline: none; transition: border-color .2s; }
-        .newsletter-input::placeholder { color: rgba(255,255,255,0.35); }
-        .newsletter-input:focus { border-color: #f97316; }
-        .newsletter-btn { padding: 12px 24px; background: #f97316; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .2s; white-space: nowrap; }
-        .newsletter-btn:hover { background: #ea6a0a; }
+        .newsletter-input {
+          flex: 1; padding: 12px 16px; border-radius: 10px;
+          border: 1px solid var(--border, #e5e7eb);
+          background: var(--input, #f3f4f6);
+          color: var(--text, #1a1a1a);
+          font-size: 14px; outline: none;
+          transition: border-color .2s, box-shadow .2s;
+        }
+        .newsletter-input::placeholder { color: var(--text3, #9ca3af); }
+        .newsletter-input:focus { border-color: var(--orange, #f97316); box-shadow: 0 0 0 3px rgba(249,115,22,0.12); }
+        .newsletter-btn { padding: 12px 24px; background: var(--orange, #f97316); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .2s; white-space: nowrap; }
+        .newsletter-btn:hover { background: var(--orange-dark, #ea6a0a); }
         .newsletter-droite { flex: 0 0 200px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
         .newsletter-deco { position: relative; }
         .deco-ico { color: rgba(249,115,22,0.4); position: relative; z-index: 2; }
