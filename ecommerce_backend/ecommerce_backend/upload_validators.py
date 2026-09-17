@@ -1,9 +1,21 @@
 """Validation MIME / taille pour les uploads images."""
 
-import imghdr
-
+from PIL import Image
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
+
+
+def _detect_image_type(uploaded_file):
+    try:
+        uploaded_file.seek(0)
+        with Image.open(uploaded_file) as img:
+            img.verify()
+            fmt = (img.format or '').lower()
+        uploaded_file.seek(0)
+        return fmt
+    except Exception:
+        uploaded_file.seek(0)
+        return None
 
 
 def validate_uploaded_image(uploaded_file, field_name='image'):
@@ -27,11 +39,10 @@ def validate_uploaded_image(uploaded_file, field_name='image'):
             field_name: f'Type de fichier non autorisé ({content_type}).',
         })
 
-    header = uploaded_file.read(512)
-    uploaded_file.seek(0)
-    detected = imghdr.what(None, header)
+    detected = _detect_image_type(uploaded_file)
     ext_map = {
         'jpeg': 'image/jpeg',
+        'jpg': 'image/jpeg',
         'png': 'image/png',
         'gif': 'image/gif',
         'webp': 'image/webp',
