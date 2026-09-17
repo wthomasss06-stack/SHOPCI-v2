@@ -4,6 +4,7 @@
 from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from users.permissions import IsVendor
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
@@ -23,7 +24,6 @@ class ProductListCreateView(generics.ListCreateAPIView):
         .prefetch_related('images')
     )
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'created_at', 'name']
@@ -33,7 +33,9 @@ class ProductListCreateView(generics.ListCreateAPIView):
         return ProductCreateSerializer if self.request.method == 'POST' else ProductSerializer
 
     def get_permissions(self):
-        return [IsAuthenticated()] if self.request.method == 'POST' else [AllowAny()]
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsVendor()]
+        return [AllowAny()]
 
     def perform_create(self, serializer):
         serializer.save(vendor=self.request.user)

@@ -4,6 +4,8 @@ from datetime import timedelta
 from pathlib import Path
 
 from django.test import TestCase, override_settings
+
+LEGACY_ON = override_settings(LEGACY_PASSWORD_AUTH_ENABLED=True)
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -16,6 +18,7 @@ from .account_restrictions import (
 from .models import User
 
 
+@LEGACY_ON
 class AccountRestrictionsTests(TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

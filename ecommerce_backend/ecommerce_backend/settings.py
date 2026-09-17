@@ -174,10 +174,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ==================================================
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'users.authentication.ActiveUserJWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -273,6 +273,11 @@ FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 # GOOGLE OAUTH — vérification des ID tokens émis par NextAuth côté frontend
 # ==================================================
 GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
+
+# Auth mot de passe (dev/tests uniquement). False en prod → Google OAuth only.
+LEGACY_PASSWORD_AUTH_ENABLED = config(
+    'LEGACY_PASSWORD_AUTH_ENABLED', default=DEBUG, cast=bool
+)
 
 # ==================================================
 # FILE UPLOAD SETTINGS

@@ -3,6 +3,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import User
+from ecommerce_backend.upload_validators import validate_uploaded_image
 from .account_restrictions import is_cooldown_over, build_cooldown_error
 
 
@@ -121,6 +122,11 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         user = self.instance
         if User.objects.exclude(pk=user.pk).filter(username=value).exists():
             raise serializers.ValidationError("Ce nom d'utilisateur est déjà utilisé.")
+        return value
+
+    def validate_profile_photo(self, value):
+        if value:
+            validate_uploaded_image(value, field_name='profile_photo')
         return value
 
 

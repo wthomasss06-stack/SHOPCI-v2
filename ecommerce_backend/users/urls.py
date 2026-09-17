@@ -1,8 +1,14 @@
 # ecommerce_backend/users/urls.py
 
 from django.urls import path
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
+
+
+class PublicTokenRefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
 
 urlpatterns = [
     # Authentication
@@ -24,5 +30,5 @@ urlpatterns = [
     path('delete-account/', views.DeleteAccountView.as_view(), name='delete-account'),
     
     # Token Refresh
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    path('token/refresh/', PublicTokenRefreshView.as_view(), name='token-refresh'),
 ]

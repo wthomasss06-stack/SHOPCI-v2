@@ -4,7 +4,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
+from .health import health_check
+
+
+class PublicTokenRefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+
+class PublicTokenVerifyView(TokenVerifyView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
 
 # Configuration personnalisée de l'admin
 admin.site.site_header = "ShopCI Administration"
@@ -20,6 +32,7 @@ urlpatterns = [
     # ==================================================
     # API ENDPOINTS
     # ==================================================
+    path('api/health/', health_check, name='health-check'),
     path('api/users/', include('users.urls')),
     path('api/products/', include('products.urls')),
     path('api/cart/', include('cart.urls')),
@@ -28,8 +41,8 @@ urlpatterns = [
     # ==================================================
     # JWT TOKEN MANAGEMENT
     # ==================================================
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('api/token/refresh/', PublicTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', PublicTokenVerifyView.as_view(), name='token_verify'),
 ]
 
 # ==================================================

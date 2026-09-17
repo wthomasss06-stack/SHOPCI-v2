@@ -15,6 +15,7 @@ from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderCreateSerializer
 from cart.models import Cart
 from products.models import Product
+from ecommerce_backend.upload_validators import validate_uploaded_image
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -215,8 +216,16 @@ class VendorLocationUpdateView(APIView):
         if lat is None or lng is None:
             return Response({'error': 'lat et lng sont requis'}, status=400)
 
-        order.vendor_lat              = float(lat)
-        order.vendor_lng              = float(lng)
+        try:
+            lat_f = float(lat)
+            lng_f = float(lng)
+        except (TypeError, ValueError):
+            return Response({'error': 'lat et lng doivent être numériques'}, status=400)
+        if not (-90 <= lat_f <= 90) or not (-180 <= lng_f <= 180):
+            return Response({'error': 'Coordonnées GPS invalides'}, status=400)
+
+        order.vendor_lat              = lat_f
+        order.vendor_lng              = lng_f
         order.vendor_location_updated = timezone.now()
         order.save(update_fields=['vendor_lat', 'vendor_lng', 'vendor_location_updated'])
 
@@ -240,6 +249,11 @@ class PackagePhotoView(APIView):
         if not photo:
             return Response({'error': 'Aucune photo fournie'}, status=400)
 
+        try:
+            validate_uploaded_image(photo, field_name='package_photo')
+        except Exception as exc:
+            detail = getattr(exc, 'detail', {'package_photo': str(exc)})
+            return Response(detail, status=400)
         order.package_photo = photo
         order.save(update_fields=['package_photo'])
 

@@ -15,6 +15,9 @@ from django.conf import settings
 from django.utils import timezone
 from .models import User
 from .account_restrictions import log_account_action, resolve_restricted_account
+from .legacy_auth import is_legacy_password_auth_enabled, legacy_password_auth_disabled_response
+from .permissions import IsActiveAccount
+from ecommerce_backend.upload_validators import validate_uploaded_image
 from .serializers import (
     UserSerializer, 
     RegisterSerializer, 
@@ -46,11 +49,14 @@ class RegisterView(generics.CreateAPIView):
     """Inscription d'un nouvel utilisateur"""
     queryset = User.objects.all()
     permission_classes = [AllowAny]
+    authentication_classes = []
     serializer_class = RegisterSerializer
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'auth'
 
     def create(self, request, *args, **kwargs):
+        if not is_legacy_password_auth_enabled():
+            return legacy_password_auth_disabled_response()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -69,10 +75,13 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(APIView):
     """Connexion utilisateur"""
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'auth'
 
     def post(self, request):
+        if not is_legacy_password_auth_enabled():
+            return legacy_password_auth_disabled_response()
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -117,6 +126,7 @@ class GoogleAuthView(APIView):
     côté serveur, directement auprès de Google.
     """
     permission_classes = [AllowAny]
+    authentication_classes = []  # pas de JWT requis
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'google_auth'
 
@@ -186,10 +196,15 @@ class GoogleAuthView(APIView):
 
 class OnboardingView(APIView):
     """Finalisation du parcours d'inscription Google et choix de rôle."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActiveAccount]
 
     def post(self, request):
         user = request.user
+        if user.account_status != 'active' or not user.is_active:
+            return Response(
+                {'error': 'Compte indisponible.', 'code': 'account_unavailable'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         first_name = (request.data.get('first_name') or '').strip()
         last_name = (request.data.get('last_name') or '').strip()
         user_type = request.data.get('user_type')
@@ -215,6 +230,11 @@ class OnboardingView(APIView):
 
         update_fields = ['first_name', 'last_name', 'user_type', 'cgu_accepted', 'onboarding_completed']
         if request.FILES.get('profile_photo'):
+            try:
+                validate_uploaded_image(request.FILES['profile_photo'], field_name='profile_photo')
+            except Exception as exc:
+                detail = getattr(exc, 'detail', {'profile_photo': str(exc)})
+                return Response(detail, status=status.HTTP_400_BAD_REQUEST)
             user.profile_photo = request.FILES['profile_photo']
             update_fields.append('profile_photo')
         user.save(update_fields=update_fields)
@@ -227,7 +247,7 @@ class OnboardingView(APIView):
 
 class ProfileUpdateView(generics.RetrieveUpdateAPIView):
     """Mise à jour et lecture du profil utilisateur"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActiveAccount]
     serializer_class = ProfileUpdateSerializer
 
     def get_object(self):
@@ -251,6 +271,8 @@ class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        if not is_legacy_password_auth_enabled():
+            return legacy_password_auth_disabled_response()
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -301,16 +323,18 @@ class DeleteAccountView(APIView):
 class PasswordResetRequestView(APIView):
     """Demande de réinitialisation de mot de passe"""
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'password_reset'
 
     def post(self, request):
+        if not is_legacy_password_auth_enabled():
+            return legacy_password_auth_disabled_response()
         email = request.data.get('email')
-        
+
         try:
             user = User.objects.get(email=email)
-            
-            # Génération du token
+
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -341,10 +365,13 @@ class PasswordResetRequestView(APIView):
 class PasswordResetConfirmView(APIView):
     """Confirmation de réinitialisation de mot de passe"""
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'password_reset_confirm'
 
     def post(self, request):
+        if not is_legacy_password_auth_enabled():
+            return legacy_password_auth_disabled_response()
         uid = request.data.get('uid')
         token = request.data.get('token')
         new_password = request.data.get('new_password')

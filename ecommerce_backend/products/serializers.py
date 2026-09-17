@@ -2,6 +2,7 @@
 # VERSION COMPLÈTE avec FavoriteSerializer
 
 from rest_framework import serializers
+from ecommerce_backend.upload_validators import validate_uploaded_image, validate_uploaded_images
 from .models import Product, Category, ProductImage, Favorite
 import json
 
@@ -93,6 +94,15 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     def validate_stock(self, value):
         if value < 0:
             raise serializers.ValidationError("Le stock ne peut pas être négatif.")
+        return value
+
+    def validate_image(self, value):
+        if value:
+            validate_uploaded_image(value, field_name='image')
+        return value
+
+    def validate_additional_images(self, value):
+        validate_uploaded_images(value, field_name='additional_images')
         return value
 
     def create(self, validated_data):
