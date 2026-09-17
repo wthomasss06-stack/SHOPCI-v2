@@ -13,6 +13,7 @@ import {
   Navigation, AlertTriangle, X, Search
 } from 'lucide-react';
 import { ordersAPI, authAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageLoader from '@/components/Loader';
@@ -104,12 +105,7 @@ export default function BuyerDashboard() {
 
   const user = authAPI.getCurrentUser();
 
-  const getImageUrl = (p) => {
-    if (!p) return 'https://placehold.co/48x48/fff7ed/f97316?text=?';
-    if (p.startsWith('http')) return p;
-    const base = (import.meta.env?.VITE_API_URL || 'http://localhost:8000').replace(/\/api$/, '');
-    return `${base}${p.startsWith('/') ? p : `/${p}`}`;
-  };
+
 
   const loadOrders = useCallback(async () => {
     setLoading(true);

@@ -20,7 +20,7 @@ async function refreshDjangoToken(refreshToken) {
     body: JSON.stringify({ refresh: refreshToken }),
   });
   if (!res.ok) throw new Error('Échec du rafraîchissement du token');
-  return res.json(); // { access }
+  return res.json(); // { access, refresh? }
 }
 
 export const authOptions = {
@@ -51,7 +51,15 @@ export const authOptions = {
           token.error = undefined;
         } catch (err) {
           token.error = 'GoogleExchangeFailed';
+          delete token.djangoAccess;
+          delete token.djangoRefresh;
+          delete token.accessExpires;
         }
+        return token;
+      }
+
+      // Si une erreur de rafraîchissement a déjà eu lieu, ne pas retenter indéfiniment
+      if (token.error === 'RefreshFailed' || token.error === 'GoogleExchangeFailed') {
         return token;
       }
 
@@ -63,13 +71,21 @@ export const authOptions = {
       // Expiré : on rafraîchit côté serveur
       if (token.djangoRefresh) {
         try {
-          const { access } = await refreshDjangoToken(token.djangoRefresh);
-          token.djangoAccess = access;
+          const resData = await refreshDjangoToken(token.djangoRefresh);
+          token.djangoAccess = resData.access;
+          if (resData.refresh) {
+            token.djangoRefresh = resData.refresh;
+          }
           token.accessExpires = Date.now() + ACCESS_TOKEN_LIFETIME_MS;
           token.error = undefined;
-        } catch {
+        } catch (err) {
           token.error = 'RefreshFailed';
+          delete token.djangoAccess;
+          delete token.djangoRefresh;
+          delete token.accessExpires;
         }
+      } else {
+        token.error = 'RefreshFailed';
       }
 
       return token;
@@ -77,8 +93,15 @@ export const authOptions = {
 
     // Seul l'access token (courte durée de vie) atteint le client, jamais le refresh token.
     async session({ session, token }) {
-      session.accessToken = token.djangoAccess;
-      session.error = token.error;
+      if (token.error) {
+        session.accessToken = null;
+        session.error = token.error;
+        session.user = null;
+        return session;
+      }
+
+      session.accessToken = token.djangoAccess || null;
+      session.error = undefined;
       if (token.shopciUser) {
         session.user = { ...session.user, ...token.shopciUser, onboarding_completed: token.onboardingCompleted ?? token.shopciUser?.onboarding_completed ?? false };
       }

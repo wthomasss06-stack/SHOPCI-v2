@@ -15,6 +15,7 @@ import {
   Tag, Flame, BadgePercent, ArrowRight, Clock, SlidersHorizontal, ArrowUpDown,
 } from 'lucide-react';
 import { productsAPI, cartAPI, authAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import Loader from '@/components/Loader';
@@ -469,11 +470,7 @@ export default function HomePage() {
     if (!recherche && !categorieActive) setProduits(tousLesProduits);
   }, [recherche, tousLesProduits, categorieActive]);
 
-  const getImageUrl = (chemin) => {
-    if (!chemin) return 'https://placehold.co/400x300/fff7ed/f97316?text=ShopCI';
-    if (chemin.startsWith('http')) return chemin;
-    return `http://localhost:8000${chemin.startsWith('/') ? chemin : '/' + chemin}`;
-  };
+
 
   const deconnexion = () => { authAPI.logout(); router.push('/login'); };
 

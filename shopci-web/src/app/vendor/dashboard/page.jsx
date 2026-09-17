@@ -13,6 +13,7 @@ import {
   Truck, Navigation, Search, Calendar, X, Filter
 } from 'lucide-react';
 import { productsAPI, ordersAPI, authAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
 import Loader from '@/components/Loader';
 import Footer from '@/components/Footer';
@@ -168,11 +169,7 @@ export default function VendorDashboard() {
 
   const user = authAPI.getCurrentUser();
 
-  const getImageUrl = (p) => {
-    if (!p) return 'https://placehold.co/48x48/fff7ed/f97316?text=?';
-    if (p.startsWith('http')) return p;
-    return `http://localhost:8000${p.startsWith('/') ? p : `/${p}`}`;
-  };
+
 
   const loadData = useCallback(async () => {
     setLoading(true);

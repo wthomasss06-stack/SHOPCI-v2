@@ -12,6 +12,7 @@ import {
   Lock, Construction
 } from 'lucide-react';
 import { cartAPI, ordersAPI, authAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageLoader from '@/components/Loader';
@@ -83,12 +84,7 @@ export default function Checkout() {
     }
   };
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://placehold.co/64x64/fff7ed/f97316?text=ShopCI';
-    if (imagePath.startsWith('http')) return imagePath;
-    const base = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/api$/, '');
-    return `${base}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
-  };
+
 
   // 🔒 Seul "cash" est actif — les autres sont verrouillés (travaux en cours)
   const PAYMENT_METHODS = [

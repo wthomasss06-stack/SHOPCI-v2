@@ -1,1 +1,26 @@
-{}
+{
+  "payment/moov-logo.png": {
+    "hash": "27bae4fb57a77f4565364f9acb1b69e09f73654dcb707ef9ac6e6981d064a43e",
+    "publicId": "images/payment/moov-logo",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T15:48:58.309Z"
+  },
+  "payment/mtn-logo.png": {
+    "hash": "e56cc770cbf62135de4887451df981f715213ef5e50e5e33fcf6ee2aa22fe62b",
+    "publicId": "images/payment/mtn-logo",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T15:48:59.231Z"
+  },
+  "payment/orange-logo.png": {
+    "hash": "c04eaa96a137bb7e4b658034eba45783f9d0a6143f78b85a8b432cd036aee377",
+    "publicId": "images/payment/orange-logo",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T15:49:00.014Z"
+  },
+  "payment/wave-logo.png": {
+    "hash": "1175454cbbb750abb46c39d909a5b8e12121413900f96ab0d3f586be5964a60b",
+    "publicId": "images/payment/wave-logo",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T15:49:00.757Z"
+  }
+}

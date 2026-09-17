@@ -13,10 +13,15 @@ export default function SessionSync() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.accessToken) {
+    if (status === 'authenticated' && session?.accessToken && !session?.error) {
       setSession(session.accessToken, session.user);
-    } else if (status === 'unauthenticated') {
+    } else if (status === 'unauthenticated' || session?.error) {
       clearSession();
+      if (session?.error) {
+        import('next-auth/react').then(({ signOut }) => {
+          signOut({ redirect: true, callbackUrl: '/login' });
+        });
+      }
     }
   }, [status, session]);
 

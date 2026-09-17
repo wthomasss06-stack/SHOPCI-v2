@@ -12,6 +12,7 @@ import {
   Navigation, AlertTriangle, X
 } from 'lucide-react';
 import { ordersAPI, authAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageLoader from '@/components/Loader';
@@ -75,12 +76,7 @@ export default function OrdersPage() {
 
   const getStatus = (s) => STATUS[s] || STATUS.pending;
 
-  const getImageUrl = (p) => {
-    if (!p) return 'https://placehold.co/64x64/fff7ed/f97316?text=CI';
-    if (p.startsWith('http')) return p;
-    const base = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/api$/, '');
-    return `${base}${p.startsWith('/') ? p : '/' + p}`;
-  };
+
 
   const filtered = orders.filter(o => {
     const matchStatus = filterStatus === 'all' || o.status === filterStatus;

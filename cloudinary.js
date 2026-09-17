@@ -19,7 +19,7 @@
 // du chemin corrigés pour coller à la vraie arborescence AKATech, qui est
 // en minuscules : public/images/, pas public/IMAGES/.)
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwuybrjxh'
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'gks3f2st'
 
 // Racine Cloudinary — correspond au dossier local réellement utilisé dans le projet.
 // On garde les anciens chemins legacy tolérés en entrée, mais la cible canonique est

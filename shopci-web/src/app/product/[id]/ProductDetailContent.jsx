@@ -16,8 +16,9 @@ import axios from 'axios';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Loader from '@/components/Loader';
+import { getImageUrl } from '@/lib/getImageUrl';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const favoritesAPI = {
   checkFavorite: async (productId) => {
@@ -122,11 +123,7 @@ export default function ProductDetail() {
     setQuantity(Math.max(1, n));
   };
 
-  const getImageUrl = (p) => {
-    if (!p) return 'https://placehold.co/600x600/fff7ed/f97316?text=ShopCI';
-    if (p.startsWith('http')) return p;
-    return `http://localhost:8000${p.startsWith('/') ? p : '/' + p}`;
-  };
+
 
   /* ── Loader ── */
   if (loading) return <Loader message="Chargement du produit…" />;

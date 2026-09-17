@@ -18,13 +18,20 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
-# Application definition
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+]
+
+if CLOUDINARY_URL:
+    INSTALLED_APPS.append('cloudinary_storage')
+
+INSTALLED_APPS += [
     'django.contrib.staticfiles',
 
     # Apps tierces
@@ -33,18 +40,18 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',  # Pour la déconnexion
     'corsheaders',
     'django_filters',
+]
 
+if CLOUDINARY_URL:
+    INSTALLED_APPS.append('cloudinary')
+
+INSTALLED_APPS += [
     # Apps locales
     'users',
     'products',
     'cart',
     'orders',
 ]
-
-# Médias en production : Cloudinary si CLOUDINARY_URL est définie (cf. plus bas)
-CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
-if CLOUDINARY_URL:
-    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # ⚠️ Doit être en premier !
@@ -125,11 +132,40 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # ==================================================
 if CLOUDINARY_URL:
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': config('CLOUDINARY_API_KEY'),
+        'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    }
+    # Initialise explicitement le SDK Cloudinary depuis les variables d'env.
+    # Nécessaire car django-cloudinary-storage et le SDK cloudinary peuvent
+    # utiliser deux configs indépendantes. On s'assure qu'elles sont synchrones.
+    import cloudinary
+    cloudinary.config(
+        cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+        api_key=config('CLOUDINARY_API_KEY'),
+        api_secret=config('CLOUDINARY_API_SECRET'),
+        secure=True,
+    )
 else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    # ⚠️ Stockage disque local : ne sert AUCUN fichier une fois DEBUG=False.
-    # Renseigner CLOUDINARY_URL (voir .env.example) avant toute mise en prod.
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

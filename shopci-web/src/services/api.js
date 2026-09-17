@@ -18,6 +18,10 @@ let _currentUser = null;
 async function hydrateSessionFromNextAuth() {
   try {
     const session = await getSession();
+    if (session?.error === 'RefreshFailed' || session?.error === 'GoogleExchangeFailed') {
+      clearSession();
+      return null;
+    }
     if (session?.accessToken) {
       setSession(session.accessToken, session.user);
       return session.accessToken;
@@ -77,7 +81,9 @@ axiosInstance.interceptors.response.use(
         // côté serveur, qui rafraîchit le token Django si besoin (le refresh
         // token, lui, reste côté serveur — jamais exposé ici).
         const session = await getSession();
-        if (!session?.accessToken) throw new Error('no session');
+        if (!session?.accessToken || session.error === 'RefreshFailed' || session.error === 'GoogleExchangeFailed') {
+          throw new Error('RefreshFailed');
+        }
         setSession(session.accessToken, session.user);
         originalRequest.headers = {
           ...originalRequest.headers,
@@ -87,7 +93,8 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         clearSession();
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          const { signOut } = await import('next-auth/react');
+          await signOut({ redirect: true, callbackUrl: '/login' });
         }
         return Promise.reject(refreshError);
       }

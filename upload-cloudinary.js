@@ -20,29 +20,18 @@ for (const envPath of envPaths) {
   });
 }
 
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
-
-if (!cloudName || !apiKey || !apiSecret) {
-  console.error('❌ CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY ou CLOUDINARY_API_SECRET manquant.');
-  console.error('PowerShell correct :');
-  console.error("  $env:CLOUDINARY_CLOUD_NAME='gks3f2st'");
-  console.error("  $env:CLOUDINARY_API_KEY='674331848559466'");
-  console.error("  $env:CLOUDINARY_API_SECRET='V8-tl1howLhCFFPDNcdwS4XjB64faut'");
-  process.exit(1);
-}
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'gks3f2st';
+const apiKey = process.env.CLOUDINARY_API_KEY || '674331848559466';
+const apiSecret = process.env.CLOUDINARY_API_SECRET || 'V8-tl1howLhCFFPDNcdwS4XjB64';
 
 const BASE_FOLDER = 'images';
-const fallbackImagesDir = path.join(__dirname, 'ecomm');
-const appPublicImagesDir = path.join(__dirname, 'shopci-web', 'public', 'images');
-const legacyRootImagesDir = path.join(__dirname, 'public', 'images');
-const defaultImagesDir = fs.existsSync(appPublicImagesDir)
-  ? appPublicImagesDir
-  : fs.existsSync(legacyRootImagesDir)
-    ? legacyRootImagesDir
-    : fallbackImagesDir;
-const imagesDir = defaultImagesDir;
+const candidateDirs = [
+  path.join(__dirname, 'shopci-web', 'public', 'images'),
+  path.join(__dirname, 'public', 'images'),
+  path.join(__dirname, 'ecommerce_backend', 'media'),
+  path.join(__dirname, 'ecomm'),
+].filter(d => fs.existsSync(d));
+
 const manifestPath = path.join(__dirname, '.cloudinary-manifest.json');
 const FORCE = process.argv.includes('--force');
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -58,6 +47,7 @@ function fileHash(filePath) {
 }
 
 function getFilesRecursively(dir) {
+  if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const filePath = path.join(dir, entry.name);
     return entry.isDirectory() ? getFilesRecursively(filePath) : [filePath];
@@ -120,20 +110,33 @@ async function uploadFile(filePath, relativePath) {
 }
 
 async function uploadAll() {
-  if (!fs.existsSync(imagesDir)) {
-    throw new Error(`Le dossier source n'existe pas. Attendu: ${defaultImagesDir} ou ${fallbackImagesDir}`);
+  if (candidateDirs.length === 0) {
+    throw new Error(`Aucun dossier d'images source n'a été trouvé.`);
   }
+
+  const fileEntries = [];
+  const addedRelativePaths = new Set();
+
+  for (const baseDir of candidateDirs) {
+    const files = getFilesRecursively(baseDir);
+    for (const filePath of files) {
+      const relativePath = path.relative(baseDir, filePath).replace(/\\/g, '/');
+      if (!addedRelativePaths.has(relativePath)) {
+        addedRelativePaths.add(relativePath);
+        fileEntries.push({ filePath, relativePath });
+      }
+    }
+  }
+
   const manifest = loadManifest();
-  const files = getFilesRecursively(imagesDir);
   let uploaded = 0;
   let skipped = 0;
   let failed = 0;
   const seenPaths = new Set();
 
-  console.log(`🚀 Synchronisation de ${files.length} médias vers Cloudinary${DRY_RUN ? ' (dry-run)' : ''}${FORCE ? ' (force)' : ''}`);
+  console.log(`🚀 Synchronisation de ${fileEntries.length} médias depuis [${candidateDirs.map(d => path.basename(d)).join(', ')}] vers Cloudinary${DRY_RUN ? ' (dry-run)' : ''}${FORCE ? ' (force)' : ''}`);
 
-  for (const filePath of files) {
-    const relativePath = path.relative(imagesDir, filePath).replace(/\\/g, '/');
+  for (const { filePath, relativePath } of fileEntries) {
     const publicId = publicIdFor(relativePath);
     const hash = fileHash(filePath);
     seenPaths.add(relativePath);

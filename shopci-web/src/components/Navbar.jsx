@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import {
   ShoppingCart, ShoppingBag, Settings, LogOut, Plus,
   Menu, X, Home, Package, BarChart3, Bell,
@@ -12,6 +13,7 @@ import {
   Sun, Moon, Camera, Truck, CheckCircle, MapPin
 } from 'lucide-react';
 import { authAPI, cartAPI, notificationsAPI, ordersAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 
 /* ── Logo SVG ─────────────────────────────────────────── */
 function LogoShopCI({ size = 30, dark = false }) {
@@ -105,7 +107,8 @@ function buildBuyerNotifs(orders) {
 /* ════════════════════════════════════════════════════════ */
 export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }) {
   const router = useRouter();
-  const [user]       = useState(authAPI.getCurrentUser());
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState(() => authAPI.getCurrentUser());
   const [menuMobile, setMenuMobile] = useState(false);
   const [notifOpen,  setNotifOpen]  = useState(false);
   const [scrolled,    setScrolled]    = useState(false);
@@ -113,6 +116,16 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
   const lastScrollY = useRef(0);
   const [cartCount,  setCartCount]  = useState(nbPanierProp);
   const notifRef = useRef(null);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user && !session?.error) {
+      setUser(session.user);
+    } else if (status === 'unauthenticated' || session?.error) {
+      setUser(null);
+    } else {
+      setUser(authAPI.getCurrentUser());
+    }
+  }, [session, status]);
 
   // ── Notifs vendeur ────────────────────────────────────
   const [vendorNotifs,  setVendorNotifs]  = useState([]);
@@ -160,17 +173,17 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
 
   /* ── Chargement notifs vendeur ─────────────────────────── */
   const loadVendorNotifs = useCallback(async () => {
-    if (!user || !isVendeur) return;
+    if (!user || !isVendeur || status !== 'authenticated' || session?.error) return;
     try {
       const data = await notificationsAPI.getVendorNotifications();
       setVendorNotifs(data);
       setVendorUnread(notificationsAPI.getUnreadCount(data));
     } catch {}
-  }, [user, isVendeur]);
+  }, [user, isVendeur, status, session]);
 
   /* ── Chargement notifs acheteur ────────────────────────── */
   const loadBuyerNotifs = useCallback(async () => {
-    if (!user || isVendeur) return;
+    if (!user || isVendeur || status !== 'authenticated' || session?.error) return;
     try {
       const data = await ordersAPI.getAll();
       const orders = Array.isArray(data) ? data : (data.results || []);
@@ -178,7 +191,7 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
       setBuyerNotifs(merged);
       setBuyerUnread(merged.filter(n => !n.read).length);
     } catch {}
-  }, [user, isVendeur]);
+  }, [user, isVendeur, status, session]);
 
   useEffect(() => {
     const h = () => {
@@ -198,30 +211,33 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
   }, []);
 
   const loadCart = useCallback(async () => {
-    if (!user) return;
+    if (!user || status !== 'authenticated' || session?.error) return;
     try {
       const c = await cartAPI.getCart();
       setCartCount(c.items?.reduce((s, i) => s + (i.quantity || 0), 0) || 0);
     } catch {}
-  }, [user]);
+  }, [user, status, session]);
 
   useEffect(() => {
+    if (!user || status !== 'authenticated' || session?.error) return;
     loadCart();
     const id = setInterval(loadCart, 30000);
     return () => clearInterval(id);
-  }, [loadCart]);
+  }, [loadCart, user, status, session]);
 
   useEffect(() => {
+    if (!user || !isVendeur || status !== 'authenticated' || session?.error) return;
     loadVendorNotifs();
     const id = setInterval(loadVendorNotifs, 30000);
     return () => clearInterval(id);
-  }, [loadVendorNotifs]);
+  }, [loadVendorNotifs, user, isVendeur, status, session]);
 
   useEffect(() => {
+    if (!user || isVendeur || status !== 'authenticated' || session?.error) return;
     loadBuyerNotifs();
     const id = setInterval(loadBuyerNotifs, 20000); // 20s pour les acheteurs
     return () => clearInterval(id);
-  }, [loadBuyerNotifs]);
+  }, [loadBuyerNotifs, user, isVendeur, status, session]);
 
   const markAllRead = () => {
     if (isVendeur) {
@@ -258,11 +274,7 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '' }
     return <Bell size={s} color={color} />;
   };
 
-  const getImageUrl = (p) => {
-    if (!p) return null;
-    if (p.startsWith('http')) return p;
-    return `http://localhost:8000${p.startsWith('/') ? p : '/' + p}`;
-  };
+
 
   const avatarUrl     = user?.profile_photo ? getImageUrl(user.profile_photo) : user?.profile_photo_url || null;
   const deconnexion   = () => { authAPI.logout(); router.push('/login'); };

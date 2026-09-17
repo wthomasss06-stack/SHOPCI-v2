@@ -10,6 +10,7 @@ import {
   Package, Truck, ShieldCheck, Tag, ShoppingBag
 } from 'lucide-react';
 import { cartAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageLoader from '@/components/Loader';
@@ -45,11 +46,7 @@ export default function CartPage() {
     catch { alert('Erreur'); }
   };
 
-  const getImageUrl = (p) => {
-    if (!p) return 'https://placehold.co/72x72/fff7ed/f97316?text=ShopCI';
-    if (p.startsWith('http')) return p;
-    const base = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/api$/, ''); return `${base}${p.startsWith('/') ? p : '/' + p}`;
-  };
+
 
   if (loading) return <PageLoader message="Chargement du panier…" />;
 

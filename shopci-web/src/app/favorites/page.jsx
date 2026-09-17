@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, Trash2, ArrowLeft, Eye, Home, Package, Star } from 'lucide-react';
 import { authAPI, cartAPI } from '@/services/api';
+import { getImageUrl } from '@/lib/getImageUrl';
 
 function LogoShopCI({ size = 32 }) {
   return (
@@ -59,11 +60,7 @@ export default function FavoritesPage() {
     } catch { alert("Erreur lors de l'ajout au panier"); }
   };
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://placehold.co/400x300/fff7ed/f97316?text=ShopCI';
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8000${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
-  };
+
 
   if (loading) {
     return (
