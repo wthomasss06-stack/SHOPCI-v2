@@ -87,6 +87,8 @@ export default function Footer() {
         </div>
       </div>
 
+      <div className="ft-watermark" aria-hidden="true">SHOP<strong>CI</strong></div>
+
       <div className="ft-bottom">
         <p>© {annee} <strong>ShopCI</strong> — Tous droits réservés</p>
       </div>
@@ -162,6 +164,16 @@ export default function Footer() {
         .ft-arr { color: var(--text3, #9ca3af); flex-shrink: 0; transition: color .18s, transform .18s; }
         .ft-link:hover { color: #f97316; }
         .ft-link:hover .ft-arr { color: #f97316; transform: translateX(2px); }
+
+        .ft-watermark {
+          position: relative; z-index: 1; overflow: hidden;
+          text-align: center; user-select: none; pointer-events: none;
+          font-family: 'DM Sans', system-ui, sans-serif;
+          font-size: clamp(48px, 12vw, 130px); font-weight: 900; letter-spacing: -3px;
+          line-height: 1; color: rgba(255,255,255,0.045);
+          white-space: nowrap; margin-top: -4px;
+        }
+        .ft-watermark strong { color: rgba(249,115,22,0.13); font-weight: 900; }
 
         .ft-bottom {
           border-top: 1px solid var(--border, #e5e7eb);
