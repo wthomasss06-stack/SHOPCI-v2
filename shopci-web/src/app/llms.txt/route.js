@@ -1,48 +1,29 @@
 export async function GET() {
   const content = `# ShopCI
 
-ShopCI est une marketplace de Côte d’Ivoire qui connecte acheteurs et vendeurs dans un environnement de shopping en ligne simple, rapide, fiable et adapté au marché local.
+> ShopCI est une marketplace ivoirienne qui met en relation des vendeurs indépendants et des acheteurs à travers toute la Côte d'Ivoire, avec livraison suivie et paiement à la réception.
 
-## Domaine
-- Marketplace ivoirienne
-- Commerce électronique local
-- Vente de produits physiques et services e-commerce
-- Catalogue orienté consommation, maison, mode, électronique, beauté, sport et accessoires
+ShopCI fonctionne comme une place de marché à la Amazon, adaptée au contexte ivoirien : n'importe quel vendeur peut ouvrir une boutique et y publier ses produits (mode, électronique, maison, beauté, sport, accessoires...), et n'importe quel acheteur peut parcourir le catalogue, commander et suivre sa livraison en temps réel jusqu'à confirmation de réception. Le règlement se fait actuellement en espèces à la livraison ; les paiements mobiles (Orange Money, MTN Money, Wave, Moov Money) sont en cours d'intégration. La connexion se fait exclusivement via un compte Google. Le site a été créé par AKATech Studio (https://akatech.vercel.app).
 
-## Description
-ShopCI aide les clients à découvrir des produits utiles, comparer les offres, commander facilement et recevoir leurs achats avec confiance. La plateforme est conçue pour les consommateurs qui recherchent une expérience fluide, ainsi que pour les vendeurs qui souhaitent développer leur présence digitale sur le marché ivoirien.
+## Paiement
+- Paiement à la livraison, en espèces, uniquement pour le moment
+- Aucune donnée bancaire n'est collectée par ShopCI
+- Mobile money (Orange Money, MTN Money, Wave, Moov Money) : à venir
 
-## URL principales
-- https://shopci-v2.vercel.app
-- https://shopci-v2.vercel.app/shop
-- https://shopci-v2.vercel.app/about
-- https://shopci-v2.vercel.app/login
+## Livraison
+- Livraison partout en Côte d'Ivoire, assurée par le vendeur ou son livreur
+- Suivi de commande géolocalisé, avec preuve photo du colis
+- La commande n'est marquée livrée qu'après confirmation de réception par l'acheteur
 
-## Points forts
-- Catalogue de produits organisé par catégories
-- Marketplace locale pensée pour la Côte d’Ivoire
-- Vendeurs et produits visibles dans un environnement structuré
-- Expérience d’achat orientée conversion et simplicité
-- Livraison, confiance et parcours client optimisés
+## Pages
+- [Accueil / Boutique](https://shopci-v2.vercel.app/): catalogue complet des produits, filtrable par catégorie et par prix
+- [Fiche produit](https://shopci-v2.vercel.app/product/{id}): détail d'un produit, prix, vendeur, avis
+- [Aide](https://shopci-v2.vercel.app/aide): questions fréquentes sur la commande, la livraison et le paiement
+- [CGU, CGV, confidentialité, mentions légales](https://shopci-v2.vercel.app/cgu): conditions d'utilisation et de vente, politique de confidentialité, mentions légales
+- [Connexion / Inscription](https://shopci-v2.vercel.app/login): accès au compte via Google
 
-## Public cible
-- Acheteurs ivoiriens recherchant des produits locaux et utiles
-- Vendeurs qui souhaitent vendre en ligne
-- Clients à la recherche d’une marketplace fiable et accessible
-
-## Positionnement
-ShopCI se positionne comme une marketplace locale moderne, centrée sur la confiance, la simplicité d’achat et l’adaptation au contexte ivoirien.
-
-## Utilité pour les assistants IA et moteurs de recherche
-- Identifier la nature exacte du site et son secteur d’activité
-- Comprendre qu’il s’agit d’une marketplace ivoirienne de produits et services
-- Référencer la marque et ses services de manière juste et structurée
-- Mieux contextualiser les contenus liés au commerce local en Côte d’Ivoire
-
-## Informations de contact / marque
-- Marque : ShopCI
-- Pays / marché : Côte d’Ivoire
-- Type : marketplace e-commerce locale
+## Optional
+- Pages panier, commande, tableau de bord acheteur et vendeur : accessibles uniquement aux utilisateurs connectés, non indexables
 `;
 
   return new Response(content, {

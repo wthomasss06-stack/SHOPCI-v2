@@ -9,7 +9,7 @@ import {
   FileText, Shield, Scale, ChevronRight, ChevronDown,
   AlertTriangle, CheckCircle, Lock, Eye,
   Mail, MapPin, Calendar, Info, ExternalLink,
-  Phone, MessageCircle,
+  Phone, MessageCircle, ShoppingBag,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -146,16 +146,17 @@ export default function CGUPage() {
       document.head.appendChild(link);
     }
     const hash = window.location.hash.replace('#', '');
-    if (['confidentialite', 'mentions'].includes(hash)) {
+    if (['cgv', 'confidentialite', 'mentions'].includes(hash)) {
       setActiveTab(hash);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
 
   const TABS = [
-    { id: 'cgu',             label: 'CGU',              icon: FileText, color: '#f97316', bg: 'rgba(249,115,22,.15)' },
-    { id: 'confidentialite', label: 'Confidentialité',  icon: Shield,   color: '#3b82f6', bg: 'rgba(59,130,246,.15)' },
-    { id: 'mentions',        label: 'Mentions légales', icon: Scale,    color: '#7e22ce', bg: 'rgba(126,34,206,.15)' },
+    { id: 'cgu',             label: 'CGU',              icon: FileText,    color: '#f97316', bg: 'rgba(249,115,22,.15)' },
+    { id: 'cgv',             label: 'CGV',              icon: ShoppingBag, color: '#16a34a', bg: 'rgba(22,163,74,.15)' },
+    { id: 'confidentialite', label: 'Confidentialité',  icon: Shield,      color: '#3b82f6', bg: 'rgba(59,130,246,.15)' },
+    { id: 'mentions',        label: 'Mentions légales', icon: Scale,       color: '#7e22ce', bg: 'rgba(126,34,206,.15)' },
   ];
 
   const currentTab = TABS.find(t => t.id === activeTab);
@@ -403,6 +404,7 @@ export default function CGUPage() {
               <div>
                 <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', margin: '0 0 4px' }}>
                   {activeTab === 'cgu' && "Conditions Générales d'Utilisation"}
+                  {activeTab === 'cgv' && 'Conditions Générales de Vente'}
                   {activeTab === 'confidentialite' && 'Politique de Confidentialité'}
                   {activeTab === 'mentions' && 'Mentions Légales'}
                 </h2>
@@ -520,6 +522,82 @@ export default function CGUPage() {
               </div>
             )}
 
+            {/* ═══════════════ CGV ═══════════════ */}
+            {activeTab === 'cgv' && (
+              <div>
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="1" color="#16a34a" bg="rgba(22,163,74,.12)"/> Objet et champ d'application</div>
+                  <InfoBlock>
+                    Les présentes Conditions Générales de Vente (CGV) régissent toute transaction d'achat conclue sur ShopCI entre un acheteur et un vendeur. Elles complètent les <a href="#" onClick={(e)=>{e.preventDefault();handleTab('cgu');}} style={{color:'#16a34a',fontWeight:700}}>CGU</a> et s'appliquent à chaque commande passée sur la plateforme.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="2" color="#16a34a" bg="rgba(22,163,74,.12)"/> Rôle de ShopCI</div>
+                  <InfoBlock>
+                    ShopCI est une place de marché : elle met en relation des vendeurs indépendants avec des acheteurs, mais n'est ni vendeur ni propriétaire des produits proposés. Chaque vendeur reste seul responsable de l'exactitude de ses annonces, de la conformité et de la qualité de ses produits.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="3" color="#16a34a" bg="rgba(22,163,74,.12)"/> Prix</div>
+                  <InfoBlock>
+                    Les prix sont fixés librement par chaque vendeur et affichés en Francs CFA (FCFA), toutes taxes applicables comprises. ShopCI ne fixe ni ne négocie les prix des produits.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="4" color="#16a34a" bg="rgba(22,163,74,.12)"/> Commande et paiement</div>
+                  <InfoBlock>
+                    La commande est confirmée dès sa validation par l'acheteur puis sa prise en charge par le vendeur. Le règlement s'effectue actuellement en espèces, au moment de la livraison — vous ne payez qu'une fois le produit entre vos mains. D'autres moyens de paiement (Orange Money, MTN Money, Wave, Moov Money) seront proposés prochainement.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="5" color="#16a34a" bg="rgba(22,163,74,.12)"/> Livraison</div>
+                  <InfoBlock>
+                    Chaque commande fait l'objet d'un suivi de livraison géolocalisé. La commande n'est marquée comme livrée qu'après confirmation de réception par l'acheteur, ce qui constitue la preuve de bonne exécution de la vente.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="6" color="#16a34a" bg="rgba(22,163,74,.12)"/> Retours et remboursements</div>
+                  <InfoBlock>
+                    Un produit non conforme ou endommagé peut être signalé dans un délai de 7 jours après réception, via l'aide ShopCI. Les conditions précises de retour (prise en charge, remboursement) sont examinées au cas par cas avec le vendeur concerné.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="7" color="#16a34a" bg="rgba(22,163,74,.12)"/> Commission ShopCI</div>
+                  <InfoBlock>
+                    ShopCI perçoit une commission sur chaque vente réalisée par un vendeur sur la plateforme, ainsi qu'un abonnement vendeur. Le taux de commission et le montant de l'abonnement en vigueur sont communiqués aux vendeurs lors de leur inscription : <strong>[À COMPLÉTER PAR LE CLIENT]</strong>.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="8" color="#16a34a" bg="rgba(22,163,74,.12)"/> Responsabilité</div>
+                  <InfoBlock>
+                    ShopCI n'intervient pas dans la fabrication, le stockage ou l'expédition des produits. La responsabilité liée à la conformité, la garantie légale et la sécurité des produits vendus incombe au vendeur.
+                  </InfoBlock>
+                </div>
+
+                <div style={{ marginBottom: 32 }}>
+                  <div className="cgu-sec-title"><SectionNum n="9" color="#16a34a" bg="rgba(22,163,74,.12)"/> Droit applicable et litiges</div>
+                  <InfoBlock>
+                    Les présentes CGV sont soumises au droit ivoirien. Tout litige relatif à une transaction sera, à défaut de résolution amiable via l'aide ShopCI, porté devant les juridictions compétentes de Côte d'Ivoire.
+                  </InfoBlock>
+                </div>
+
+                <div className="cgu-accept-banner">
+                  <CheckCircle size={32} color="#16a34a" style={{ margin: '0 auto 10px', display: 'block' }} />
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text)', marginBottom: 6 }}>Acceptation des CGV</h3>
+                  <p style={{ fontSize: 13.5, color: 'var(--text2)' }}>
+                    Passer une commande sur ShopCI vaut acceptation pleine et entière des présentes Conditions Générales de Vente.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* ═══════════════ CONFIDENTIALITÉ ═══════════════ */}
             {activeTab === 'confidentialite' && (
               <div>
@@ -538,7 +616,7 @@ export default function CGUPage() {
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: 'rgba(59,130,246,.06)', border: '1px solid rgba(59,130,246,.2)', borderRadius: 12, padding: '12px 16px', marginTop: 12 }}>
                     <Info size={15} color="#3b82f6" style={{ flexShrink: 0, marginTop: 1 }} />
                     <span style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.55 }}>
-                      ShopCI n'utilise actuellement aucun cookie publicitaire ni outil de mesure d'audience tiers (type Google Analytics). Seul un stockage technique local à votre navigateur conserve votre session de connexion.
+                      ShopCI n'utilise aucun cookie publicitaire ni outil de suivi individuel. Un outil de mesure d'audience anonymisé et sans cookie (Vercel Analytics) est utilisé pour connaître la fréquentation globale du site, sans identifier les visiteurs. Un stockage technique local à votre navigateur conserve par ailleurs votre session de connexion.
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: 'rgba(220,38,38,.06)', border: '1px solid rgba(220,38,38,.2)', borderRadius: 12, padding: '12px 16px', marginTop: 12 }}>
@@ -609,7 +687,7 @@ export default function CGUPage() {
                       { label: 'Forme juridique :', value: '[À COMPLÉTER PAR LE CLIENT]' },
                       { label: 'RCCM :', value: '[À COMPLÉTER PAR LE CLIENT]' },
                       { label: 'Directeur de publication :', value: '[À COMPLÉTER PAR LE CLIENT]' },
-                      { label: 'Hébergeur :', value: '[À COMPLÉTER PAR LE CLIENT]' },
+                      { label: 'Hébergeur :', value: 'Vercel Inc. (frontend) et Render Services, Inc. (backend et base de données)' },
                       { label: 'Pays :', value: 'République de Côte d\'Ivoire', icon: MapPin },
                       { label: 'Contact :', value: 'contact@shopci.ci', icon: Mail },
                     ].map((row, i, arr) => (
