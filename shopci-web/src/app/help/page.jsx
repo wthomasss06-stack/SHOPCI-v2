@@ -1,7 +1,7 @@
 'use client';
 
 // ecommerce-frontend/src/pages/HelpPage.jsx
-// ✅ Centre d'Aide ShopCI — UX/UI Premium — Inspiré TerraSafe
+// ✅ Centre d'Aide ShopCI — UX/UI Premium
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,62 +15,6 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-/* ══════════════════════════════════════════════════════════
-   PARTICLES CANVAS (identique au Footer)
-══════════════════════════════════════════════════════════ */
-function ParticlesCanvas({ count = 35 }) {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let raf;
-    const setSize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      canvas.width  = rect?.width  || window.innerWidth;
-      canvas.height = rect?.height || 400;
-    };
-    setSize();
-    const particles = Array.from({ length: count }, () => ({
-      x: Math.random() * (canvas.width || 800),
-      y: Math.random() * (canvas.height || 400),
-      r: Math.random() * 1.5 + 0.5,
-      dx: (Math.random() - 0.5) * 0.4, dy: (Math.random() - 0.5) * 0.4,
-      alpha: Math.random() * 0.3 + 0.15,
-      pulse: Math.random() * Math.PI * 2,
-    }));
-    const draw = () => {
-      const W = canvas.width, H = canvas.height;
-      const cr = 249, cg = 115, cb = 22;
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => {
-        p.x += p.dx; p.y += p.dy; p.pulse += 0.016;
-        if (p.x < 0 || p.x > W) p.dx *= -1;
-        if (p.y < 0 || p.y > H) p.dy *= -1;
-        const a = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
-        grad.addColorStop(0, `rgba(${cr},${cg},${cb},${a})`);
-        grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
-        ctx.fillStyle = grad; ctx.fill();
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${cr},${cg},${cb},${Math.min(a + 0.2, 0.9)})`; ctx.fill();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    window.addEventListener('resize', setSize);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', setSize); };
-  }, [count]);
-  return (
-    <canvas ref={canvasRef} style={{
-      position: 'absolute', top: 0, left: 0,
-      width: '100%', height: '100%',
-      pointerEvents: 'none', zIndex: 1, display: 'block',
-    }}/>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════
    DATA
@@ -676,7 +620,6 @@ export default function HelpPage() {
 
         {/* ═══ HERO ═══ */}
         <section className="hp-hero">
-          <ParticlesCanvas count={40} />
           <div className="hp-hero-grid" />
           <div style={{ position: 'relative', zIndex: 3, maxWidth: 1000, margin: '0 auto' }}>
 
@@ -1106,7 +1049,6 @@ export default function HelpPage() {
 
               {/* ─── CONTACT ─── */}
               <div className="hp-contact-card hp-fade hp-fade-3">
-                <ParticlesCanvas count={30} />
                 <div style={{ position: 'relative', zIndex: 3 }}>
                   <div style={{ width: 60, height: 60, borderRadius: 16, background: 'rgba(249,115,22,.18)', border: '1.5px solid rgba(249,115,22,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'float 3.5s ease-in-out infinite' }}>
                     <MessageCircle size={28} color="#f97316" />

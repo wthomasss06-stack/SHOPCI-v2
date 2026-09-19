@@ -3,59 +3,13 @@
 // src/pages/NotFoundPage.jsx
 // ShopCI — Page 404 personnalisée
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Home, ShoppingBag, ArrowLeft, Search, RefreshCw } from 'lucide-react';
 
 export default function NotFoundPage() {
   const router = useRouter();
-  const canvasRef = useRef(null);
   const [recherche, setRecherche] = useState('');
-  const animRef = useRef(null);
-
-  /* ── Particules animées ── */
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W = canvas.width  = canvas.offsetWidth;
-    let H = canvas.height = canvas.offsetHeight;
-
-    const particles = Array.from({ length: 38 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 2.5 + 0.5,
-      dx: (Math.random() - 0.5) * 0.4,
-      dy: (Math.random() - 0.5) * 0.4,
-      alpha: Math.random() * 0.4 + 0.1,
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => {
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > W) p.dx *= -1;
-        if (p.y < 0 || p.y > H) p.dy *= -1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(249,115,22,${p.alpha})`;
-        ctx.fill();
-      });
-      animRef.current = requestAnimationFrame(draw);
-    };
-    draw();
-
-    const onResize = () => {
-      W = canvas.width  = canvas.offsetWidth;
-      H = canvas.height = canvas.offsetHeight;
-    };
-    window.addEventListener('resize', onResize);
-    return () => {
-      cancelAnimationFrame(animRef.current);
-      window.removeEventListener('resize', onResize);
-    };
-  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -64,9 +18,6 @@ export default function NotFoundPage() {
 
   return (
     <div className="nf-root">
-      {/* Canvas particules arrière-plan */}
-      <canvas ref={canvasRef} className="nf-canvas" />
-
       {/* Logo cliquable */}
       <button className="nf-logo" onClick={() => router.push('/')}>
         <svg viewBox="0 0 140 34" height={32} fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -191,16 +142,6 @@ export default function NotFoundPage() {
           border-radius: 50%;
           background: radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 65%);
           pointer-events: none;
-        }
-
-        /* Canvas */
-        .nf-canvas {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 0;
         }
 
         /* Logo */
