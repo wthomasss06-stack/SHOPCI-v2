@@ -107,8 +107,8 @@ export default function AboutPage() {
 
         /* ── HERO ── */
         .ap-hero {
-          background: linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 50%,#1a1a1a 100%) !important;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 55%, var(--bg) 100%) !important;
+          border-bottom: 1px solid var(--border);
           position: relative; overflow: hidden;
           padding: 110px 40px 80px; text-align: center;
         }

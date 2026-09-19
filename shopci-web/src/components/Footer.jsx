@@ -95,7 +95,7 @@ export default function Footer() {
 
       <style>{`
         .ft-root {
-          background: var(--bg2, #ffffff);
+          background: linear-gradient(180deg, var(--bg, #fafafa) 0%, var(--bg2, #ffffff) 100%);
           color: var(--text, #1a1a1a);
           border-top: 1px solid var(--border, #e5e7eb);
           font-family: 'DM Sans', system-ui, sans-serif;

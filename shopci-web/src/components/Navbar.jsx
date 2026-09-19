@@ -331,9 +331,14 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '', 
         @keyframes nb-pop   { from{opacity:0;transform:translateY(16px) scale(.8)} to{opacity:1;transform:translateY(0) scale(1)} }
         @keyframes nb-spin  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 
-        .nb-bar { background:var(--bg2,#fff); border-bottom:1px solid var(--border,#f0f0f0); position:sticky; top:0; z-index:200; transition:box-shadow .25s,border-color .25s,background .3s; }
-        .nb-bar.scrolled { box-shadow:0 4px 24px rgba(0,0,0,.08); border-color:var(--border,#e8e8e8); }
-        .nb-bar.hero-top { background:transparent; border-bottom-color:transparent; box-shadow:none; }
+        .nb-bar {
+          background: transparent !important;
+          border-bottom: 1px solid transparent;
+          position: sticky; top: 0; z-index: 200;
+          transition: box-shadow .25s, border-color .25s, background .3s;
+        }
+        .nb-bar.scrolled { box-shadow:none; border-color:transparent; }
+        .nb-bar.hero-top { background:transparent !important; border-bottom-color:transparent; box-shadow:none; }
         .nb-bar.hero-top .nb-link { color:rgba(255,255,255,.82); }
         .nb-bar.hero-top .nb-link:hover { background:rgba(255,255,255,.1); color:#fff; }
         .nb-bar.hero-top .nb-link.act { background:rgba(249,115,22,.22); color:#fff; }
@@ -342,7 +347,7 @@ export default function Navbar({ nbPanier: nbPanierProp = 0, pageCourante = '', 
         .nb-bar.hero-top .nb-login { border-color:rgba(255,255,255,.35); color:#fff; }
         .nb-bar.hero-top .nb-login:hover { background:rgba(255,255,255,.1); }
         .nb-bar.hero-top .nb-theme-btn.dark-off { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); }
-        .nb-bar.hero-top.scrolled { background:var(--bg2,#fff); border-bottom-color:var(--border,#f0f0f0); }
+        .nb-bar.hero-top.scrolled { background:transparent !important; border-bottom-color:transparent; }
         .nb-bar.hero-top.scrolled .nb-link { color:var(--text2,#6b7280); }
         .nb-bar.hero-top.scrolled .nb-link.act { color:#f97316; background:rgba(249,115,22,.12); }
         .nb-inner { max-width:1300px; margin:0 auto; padding:0 24px; height:64px; display:flex; align-items:center; position:relative; }

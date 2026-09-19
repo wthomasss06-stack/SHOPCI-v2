@@ -130,8 +130,8 @@ export default function CGUPage() {
 
         /* ── HERO ── */
         .cgu-hero-dark {
-          background: linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 50%,#1a1a1a 100%) !important;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 55%, var(--bg) 100%) !important;
+          border-bottom: 1px solid var(--border);
           position: relative; overflow: hidden;
           padding: 110px 40px 80px; text-align: center;
         }
@@ -139,8 +139,8 @@ export default function CGUPage() {
           content: '';
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 70% 60% at 80% 10%, rgba(249,115,22,.18) 0%, transparent 55%),
-            radial-gradient(ellipse 50% 60% at 15% 90%, rgba(126,34,206,.12) 0%, transparent 55%);
+            radial-gradient(ellipse 70% 60% at 80% 10%, rgba(249,115,22,.14) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 60% at 15% 90%, rgba(59,130,246,.12) 0%, transparent 55%);
           pointer-events: none; z-index: 2;
         }
         .cgu-hero-grid {
@@ -231,8 +231,8 @@ export default function CGUPage() {
 
         /* ── CONTACT DARK CARD ── */
         .cgu-contact-dark {
-          background: linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 50%,#1a1a1a 100%) !important;
-          border: 1px solid rgba(255,255,255,.08);
+          background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 55%, var(--bg) 100%) !important;
+          border: 1px solid var(--border);
           border-radius: 22px;
           padding: 48px;
           text-align: center;
