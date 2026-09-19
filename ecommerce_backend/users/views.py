@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.throttling import ScopedRateThrottle
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -17,7 +16,14 @@ from .models import User
 from .account_restrictions import log_account_action, resolve_restricted_account
 from .legacy_auth import is_legacy_password_auth_enabled, legacy_password_auth_disabled_response
 from .permissions import IsActiveAccount
-from ecommerce_backend.upload_validators import validate_uploaded_image
+from .services import (
+    issue_tokens_for_user,
+    verify_google_id_token,
+    get_or_create_user_from_google,
+    complete_onboarding,
+    GoogleAuthError,
+    OnboardingError,
+)
 from .serializers import (
     UserSerializer, 
     RegisterSerializer, 
@@ -25,24 +31,6 @@ from .serializers import (
     ChangePasswordSerializer,
     ProfileUpdateSerializer,
 )
-
-import urllib.request
-from django.core.files.base import ContentFile
-
-
-def sync_google_profile_photo(user, picture_url):
-    """Télécharge la photo Google si l'utilisateur n'en a pas encore."""
-    if not picture_url or user.profile_photo:
-        return
-    try:
-        req = urllib.request.Request(picture_url, headers={'User-Agent': 'ShopCI/1.0'})
-        with urllib.request.urlopen(req, timeout=12) as resp:
-            data = resp.read()
-        if not data:
-            return
-        user.profile_photo.save(f'google_{user.pk}.jpg', ContentFile(data), save=True)
-    except Exception:
-        pass
 
 
 class RegisterView(generics.CreateAPIView):
@@ -61,14 +49,9 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
-        refresh = RefreshToken.for_user(user)
-        
         return Response({
             'user': UserSerializer(user, context={'request': request}).data,
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
+            'tokens': issue_tokens_for_user(user),
         }, status=status.HTTP_201_CREATED)
 
 
@@ -103,14 +86,9 @@ class LoginView(APIView):
             if not ok:
                 return Response(error, status=status.HTTP_403_FORBIDDEN)
 
-            refresh = RefreshToken.for_user(user)
-            
             return Response({
                 'user': UserSerializer(user, context={'request': request}).data,
-                'tokens': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                }
+                'tokens': issue_tokens_for_user(user),
             })
         
         return Response(
@@ -135,62 +113,20 @@ class GoogleAuthView(APIView):
         if not id_token_str:
             return Response({'error': 'id_token requis'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not settings.GOOGLE_CLIENT_ID:
-            return Response(
-                {'error': "Authentification Google non configurée côté serveur."},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
-            )
-
-        from google.oauth2 import id_token as google_id_token
-        from google.auth.transport import requests as google_requests
-
         try:
-            payload = google_id_token.verify_oauth2_token(
-                id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
-            )
-        except ValueError:
-            return Response({'error': 'Token Google invalide ou expiré'}, status=status.HTTP_401_UNAUTHORIZED)
+            payload = verify_google_id_token(id_token_str)
+        except GoogleAuthError as exc:
+            return Response(exc.detail, status=exc.status_code)
 
-        email = payload.get('email')
-        if not email or not payload.get('email_verified'):
-            return Response({'error': 'Email Google non vérifié'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        user = User.objects.filter(email=email).first()
-
-        if user is None:
-            base_username = email.split('@')[0][:25] or 'user'
-            username = base_username
-            suffix = 1
-            while User.objects.filter(username=username).exists():
-                suffix += 1
-                username = f"{base_username}{suffix}"
-
-            full_name = (payload.get('name') or '').split(' ', 1)
-            user = User.objects.create(
-                username=username,
-                email=email,
-                first_name=full_name[0] if full_name else '',
-                last_name=full_name[1] if len(full_name) > 1 else '',
-                user_type='acheteur',
-            )
-            user.set_unusable_password()  # ce compte ne se connecte que via Google
-            user.save()
-            sync_google_profile_photo(user, payload.get('picture'))
-        else:
-            sync_google_profile_photo(user, payload.get('picture'))
+        user = get_or_create_user_from_google(payload)
 
         ok, error = resolve_restricted_account(user)
         if not ok:
             return Response(error, status=status.HTTP_403_FORBIDDEN)
 
-        refresh = RefreshToken.for_user(user)
-
         return Response({
             'user': UserSerializer(user, context={'request': request}).data,
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
+            'tokens': issue_tokens_for_user(user),
         })
 
 
@@ -205,39 +141,18 @@ class OnboardingView(APIView):
                 {'error': 'Compte indisponible.', 'code': 'account_unavailable'},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        first_name = (request.data.get('first_name') or '').strip()
-        last_name = (request.data.get('last_name') or '').strip()
-        user_type = request.data.get('user_type')
-        cgu_accepted = request.data.get('cgu_accepted')
 
-        if not first_name:
-            return Response({'first_name': 'Le prénom est requis.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not last_name:
-            return Response({'last_name': 'Le nom est requis.'}, status=status.HTTP_400_BAD_REQUEST)
-        if user_type not in dict(User.USER_TYPE_CHOICES):
-            return Response({'user_type': 'Le type d’utilisateur est invalide.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if isinstance(cgu_accepted, str):
-            cgu_accepted = cgu_accepted.lower() == 'true'
-        if not cgu_accepted:
-            return Response({'cgu_accepted': 'Tu dois accepter les CGU pour continuer.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.first_name = first_name
-        user.last_name = last_name
-        user.user_type = user_type
-        user.cgu_accepted = True
-        user.onboarding_completed = True
-
-        update_fields = ['first_name', 'last_name', 'user_type', 'cgu_accepted', 'onboarding_completed']
-        if request.FILES.get('profile_photo'):
-            try:
-                validate_uploaded_image(request.FILES['profile_photo'], field_name='profile_photo')
-            except Exception as exc:
-                detail = getattr(exc, 'detail', {'profile_photo': str(exc)})
-                return Response(detail, status=status.HTTP_400_BAD_REQUEST)
-            user.profile_photo = request.FILES['profile_photo']
-            update_fields.append('profile_photo')
-        user.save(update_fields=update_fields)
+        try:
+            user = complete_onboarding(
+                user,
+                first_name=request.data.get('first_name'),
+                last_name=request.data.get('last_name'),
+                user_type=request.data.get('user_type'),
+                cgu_accepted=request.data.get('cgu_accepted'),
+                profile_photo=request.FILES.get('profile_photo'),
+            )
+        except OnboardingError as exc:
+            return Response(exc.detail, status=exc.status_code)
 
         return Response({
             'message': 'Compte finalisé avec succès.',
