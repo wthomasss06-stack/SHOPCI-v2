@@ -20,7 +20,11 @@ async function refreshDjangoToken(refreshToken) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh: refreshToken }),
   });
-  if (!res.ok) throw new Error('Échec du rafraîchissement du token');
+  if (!res.ok) {
+    const error = new Error('Échec du rafraîchissement du token');
+    error.tokenInvalid = res.status === 401; // refresh vraiment rejeté, pas un souci réseau
+    throw error;
+  }
   return res.json(); // { access, refresh? }
 }
 
@@ -60,8 +64,10 @@ export const authOptions = {
         return token;
       }
 
-      // Si une erreur de rafraîchissement a déjà eu lieu, ne pas retenter indéfiniment
-      if (token.error === 'RefreshFailed' || token.error === 'GoogleExchangeFailed') {
+      // Un échec d'échange Google initial est définitif (token Google lui-même invalide) —
+      // pas la peine de retenter. Un échec de REFRESH peut être transitoire (réseau, plusieurs
+      // onglets) : on retente au prochain contrôle plutôt que de rester bloqué indéfiniment.
+      if (token.error === 'GoogleExchangeFailed') {
         return token;
       }
 
@@ -83,8 +89,12 @@ export const authOptions = {
         } catch (err) {
           token.error = 'RefreshFailed';
           delete token.djangoAccess;
-          delete token.djangoRefresh;
           delete token.accessExpires;
+          if (err?.tokenInvalid) {
+            delete token.djangoRefresh; // vraiment mort (401) : inutile de retenter
+          }
+          // sinon (réseau, 5xx, course entre onglets) : on garde djangoRefresh pour
+          // retenter au prochain contrôle, sans repasser par une reconnexion Google.
         }
       } else {
         token.error = 'RefreshFailed';

@@ -213,8 +213,15 @@ ACCOUNT_STATUS_LOG_DIR = BASE_DIR / 'logs'
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    # Rotation désactivée volontairement : avec ROTATE_REFRESH_TOKENS + BLACKLIST_AFTER_ROTATION,
+    # deux requêtes concurrentes (plusieurs onglets, plusieurs composants qui vérifient la session
+    # en même temps) qui tentent de rafraîchir avec le même refresh token se marchent dessus —
+    # la première réussit et fait tourner le token, la seconde reçoit un token déjà blacklisté et
+    # échoue. C'est ça qui provoquait les déconnexions forcées (?reason=RefreshFailed) en prod.
+    # Le refresh token ne quitte de toute façon jamais le JS du navigateur (cookie httpOnly
+    # côté NextAuth) : la rotation protégeait contre un vol qui n'est déjà pas possible ici.
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': True,
 
     'ALGORITHM': 'HS256',
